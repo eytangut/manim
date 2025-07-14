@@ -92,9 +92,21 @@ class Camera(object):
         self.init_light_source()
 
     def init_frame(self, **config) -> None:
+        """
+        Initialize the camera frame with given configuration.
+        
+        Args:
+            **config: Configuration parameters for the CameraFrame.
+        """
         self.frame = CameraFrame(**config)
 
     def init_context(self) -> None:
+        """
+        Initialize the OpenGL context for rendering.
+        
+        Creates either a standalone context or uses the window's context
+        depending on whether a window is available.
+        """
         if self.window is None:
             self.ctx: moderngl.Context = moderngl.create_standalone_context()
         else:

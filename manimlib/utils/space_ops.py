@@ -87,6 +87,20 @@ def get_norm(vect: VectN | List[float]) -> float:
 
 
 def get_dist(vect1: VectN, vect2: VectN):
+    """
+    Calculate the distance between two vectors.
+    
+    Args:
+        vect1: First vector.
+        vect2: Second vector.
+    
+    Returns:
+        The Euclidean distance between the two vectors.
+    
+    Example:
+        >>> get_dist([0, 0], [3, 4])
+        5.0
+    """
     return get_norm(vect2 - vect1)
 
 
@@ -94,6 +108,20 @@ def normalize(
     vect: VectN | List[float],
     fall_back: VectN | List[float] | None = None
 ) -> VectN:
+    """
+    Normalize a vector to unit length.
+    
+    Args:
+        vect: Input vector to normalize.
+        fall_back: Vector to return if input has zero length.
+    
+    Returns:
+        The normalized vector with magnitude 1, or fall_back if zero vector.
+    
+    Example:
+        >>> normalize([3, 4])
+        array([0.6, 0.8])
+    """
     norm = get_norm(vect)
     if norm > 0:
         return np.array(vect) / norm

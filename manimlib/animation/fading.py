@@ -20,6 +20,18 @@ if TYPE_CHECKING:
 
 
 class Fade(Transform):
+    """
+    Base class for fade animations.
+    
+    Provides common functionality for fade in/out animations with
+    optional shift and scale effects during the fade.
+    
+    Args:
+        mobject: The mobject to fade.
+        shift: Vector to shift the mobject during fade (default: ORIGIN).
+        scale: Scale factor during fade (default: 1).
+        **kwargs: Additional animation parameters.
+    """
     def __init__(
         self,
         mobject: Mobject,
@@ -33,10 +45,35 @@ class Fade(Transform):
 
 
 class FadeIn(Fade):
+    """
+    Animation that fades a mobject into view.
+    
+    The mobject starts transparent and optionally scaled/shifted,
+    then transitions to its final position with full opacity.
+    
+    Args:
+        mobject: The mobject to fade in.
+        shift: Vector to shift from during fade in.
+        scale: Scale factor to start from during fade in.
+        **kwargs: Additional animation parameters.
+    
+    Example:
+        >>> circle = Circle()
+        >>> self.play(FadeIn(circle))
+        >>> # Fade in with effects
+        >>> self.play(FadeIn(square, shift=UP, scale=0.5))
+    """
     def create_target(self) -> Mobject:
+        """Create the target state (final appearance) of the mobject."""
         return self.mobject.copy()
 
     def create_starting_mobject(self) -> Mobject:
+        """
+        Create the starting state for fade in.
+        
+        Returns:
+            Mobject: Transparent, scaled, and shifted starting state.
+        """
         start = super().create_starting_mobject()
         start.set_opacity(0)
         start.scale(1.0 / self.scale_factor)
@@ -45,6 +82,25 @@ class FadeIn(Fade):
 
 
 class FadeOut(Fade):
+    """
+    Animation that fades a mobject out of view.
+    
+    The mobject transitions from its current state to transparent,
+    optionally with scaling and shifting effects.
+    
+    Args:
+        mobject: The mobject to fade out.
+        shift: Vector to shift to during fade out (default: ORIGIN).
+        remover: Whether to remove mobject from scene (default: True).
+        final_alpha_value: Final animation progress value (default: 0.0).
+        **kwargs: Additional animation parameters.
+    
+    Example:
+        >>> circle = Circle()
+        >>> self.play(FadeOut(circle))
+        >>> # Fade out with effects
+        >>> self.play(FadeOut(square, shift=DOWN, scale=2))
+    """
     def __init__(
         self,
         mobject: Mobject,
@@ -61,6 +117,12 @@ class FadeOut(Fade):
         )
 
     def create_target(self) -> Mobject:
+        """
+        Create the target state for fade out.
+        
+        Returns:
+            Mobject: Transparent, scaled, and shifted target state.
+        """
         result = self.mobject.copy()
         result.set_opacity(0)
         result.shift(self.shift_vect)
@@ -69,6 +131,21 @@ class FadeOut(Fade):
 
 
 class FadeInFromPoint(FadeIn):
+    """
+    Animation that fades a mobject in from a specific point.
+    
+    The mobject appears to emerge and grow from the specified point
+    until it reaches its final size and position.
+    
+    Args:
+        mobject: The mobject to fade in.
+        point: The point to fade in from.
+        **kwargs: Additional animation parameters.
+    
+    Example:
+        >>> circle = Circle()
+        >>> self.play(FadeInFromPoint(circle, ORIGIN))
+    """
     def __init__(self, mobject: Mobject, point: Vect3, **kwargs):
         super().__init__(
             mobject,
@@ -79,6 +156,21 @@ class FadeInFromPoint(FadeIn):
 
 
 class FadeOutToPoint(FadeOut):
+    """
+    Animation that fades a mobject out to a specific point.
+    
+    The mobject shrinks and moves toward the specified point
+    while becoming transparent.
+    
+    Args:
+        mobject: The mobject to fade out.
+        point: The point to fade out to.
+        **kwargs: Additional animation parameters.
+    
+    Example:
+        >>> circle = Circle()
+        >>> self.play(FadeOutToPoint(circle, ORIGIN))
+    """
     def __init__(self, mobject: Mobject, point: Vect3, **kwargs):
         super().__init__(
             mobject,
