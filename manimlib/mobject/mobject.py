@@ -63,7 +63,33 @@ if TYPE_CHECKING:
 
 class Mobject(object):
     """
-    Mathematical Object
+    Mathematical Object - the fundamental building block of Manim scenes.
+    
+    A Mobject represents any object that can be displayed, animated, and manipulated
+    in a Manim scene. This includes geometric shapes, text, images, and complex
+    mathematical constructs.
+    
+    Args:
+        color (ManimColor): The color of the mobject.
+        opacity (float): The opacity/transparency (0.0 = transparent, 1.0 = opaque).
+        shading (Tuple[float, float, float]): Shading parameters for 3D rendering.
+        texture_paths (dict[str, str] | None): Paths to texture files for rendering.
+        is_fixed_in_frame (bool): If True, mobject doesn't rotate with camera.
+        depth_test (bool): Whether to perform depth testing for 3D rendering.
+        z_index (int): Layer index for rendering order (higher = in front).
+    
+    Attributes:
+        dim (int): Dimensionality of the mobject (typically 3).
+        shader_folder (str): Path to shader files for rendering.
+        render_primitive (int): OpenGL primitive type for rendering.
+        data_dtype (np.dtype): Data type for vertex data.
+        submobjects (list[Mobject]): Child mobjects contained within this one.
+        parents (list[Mobject]): Parent mobjects that contain this one.
+    
+    Example:
+        >>> mob = Mobject(color=RED, opacity=0.8)
+        >>> mob.shift(UP)  # Move the mobject up
+        >>> mob.rotate(PI/4)  # Rotate by 45 degrees
     """
     dim: int = 3
     shader_folder: str = ""

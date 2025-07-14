@@ -1,3 +1,13 @@
+"""
+Mathematical and display constants used throughout Manim.
+
+This module defines commonly used constants for positioning, sizing, colors,
+and mathematical operations in Manim animations and scenes.
+
+The constants are derived from the global manim configuration and provide
+convenient shortcuts for common values like frame dimensions, standard colors,
+positioning buffers, and mathematical constants.
+"""
 from __future__ import annotations
 import numpy as np
 

@@ -1,3 +1,9 @@
+"""
+Creation and reveal animations for mobjects.
+
+This module contains animations that control how mobjects appear or disappear
+in scenes, including progressive drawing, fading, and partial revelation effects.
+"""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -46,6 +52,21 @@ class ShowPartial(Animation, ABC):
 
 
 class ShowCreation(ShowPartial):
+    """
+    Animation that shows the creation/drawing of a mobject progressively.
+    
+    This animation reveals the mobject gradually, as if it's being drawn or created
+    in real-time. It's particularly effective for paths, shapes, and line-based objects.
+    
+    Args:
+        mobject (Mobject): The mobject to animate the creation of.
+        lag_ratio (float): Controls timing between submobjects (default 1.0 for sequential).
+        **kwargs: Additional animation parameters passed to parent class.
+    
+    Example:
+        >>> circle = Circle()
+        >>> self.play(ShowCreation(circle))
+    """
     def __init__(self, mobject: Mobject, lag_ratio: float = 1.0, **kwargs):
         super().__init__(mobject, lag_ratio=lag_ratio, **kwargs)
 

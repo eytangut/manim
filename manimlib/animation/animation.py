@@ -21,6 +21,31 @@ DEFAULT_ANIMATION_LAG_RATIO = 0
 
 
 class Animation(object):
+    """
+    Base class for all animations in Manim.
+    
+    An Animation transforms a Mobject over time according to specified parameters.
+    This is the fundamental unit of motion and change in Manim scenes.
+    
+    Args:
+        mobject (Mobject): The mobject to be animated.
+        run_time (float): Duration of the animation in seconds.
+        time_span (tuple[float, float] | None): Start and end times for the animation.
+        lag_ratio (float): Controls staggered animation timing for submobjects.
+            - 0: All submobjects animate simultaneously
+            - 1: Submobjects animate sequentially  
+            - Between 0-1: Submobjects animate with lagged start times
+        rate_func (Callable[[float], float]): Function that maps animation progress
+            from linear time to desired easing/timing curve.
+        name (str): Optional name for the animation.
+        remover (bool): Whether this animation removes the mobject from screen.
+        final_alpha_value (float): Final progress value to set upon completion.
+        suspend_mobject_updating (bool): Whether to suspend the mobject's updaters
+            during animation.
+    
+    Example:
+        >>> animation = Animation(my_mobject, run_time=2.0, rate_func=smooth)
+    """
     def __init__(
         self,
         mobject: Mobject,

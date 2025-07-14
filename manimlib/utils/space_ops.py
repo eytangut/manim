@@ -1,3 +1,13 @@
+"""
+Spatial operations and geometric utilities for 3D mathematics.
+
+This module provides functions for 3D vector operations, rotations, coordinate
+transformations, and other spatial calculations commonly needed in 3D graphics
+and animations.
+
+Functions include vector cross products, normalizations, rotations, projections,
+and coordinate system conversions.
+"""
 from __future__ import annotations
 
 from functools import reduce
@@ -27,6 +37,21 @@ def cross(
     v2: Vect3 | List[float],
     out: np.ndarray | None = None
 ) -> Vect3 | Vect3Array:
+    """
+    Compute the cross product of two 3D vectors.
+    
+    Args:
+        v1: First vector (3D).
+        v2: Second vector (3D).
+        out: Optional output array to store result.
+    
+    Returns:
+        The cross product vector v1 × v2.
+    
+    Example:
+        >>> cross([1, 0, 0], [0, 1, 0])
+        array([0., 0., 1.])
+    """
     is2d = isinstance(v1, np.ndarray) and len(v1.shape) == 2
     if is2d:
         x1, y1, z1 = v1[:, 0], v1[:, 1], v1[:, 2]
@@ -45,6 +70,19 @@ def cross(
 
 
 def get_norm(vect: VectN | List[float]) -> float:
+    """
+    Calculate the Euclidean norm (magnitude) of a vector.
+    
+    Args:
+        vect: Input vector of any dimension.
+    
+    Returns:
+        The magnitude/length of the vector.
+    
+    Example:
+        >>> get_norm([3, 4])
+        5.0
+    """
     return sum((x**2 for x in vect))**0.5
 
 

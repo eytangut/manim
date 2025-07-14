@@ -50,6 +50,30 @@ if TYPE_CHECKING:
 
 
 class Scene(object):
+    """
+    The fundamental building block for all Manim scenes.
+    
+    A Scene is the main container for all Mobjects (Mathematical Objects) and animations.
+    It manages the camera, rendering, and playback of animations.
+    
+    Attributes:
+        random_seed (int): Seed for random number generation to ensure reproducibility.
+        pan_sensitivity (float): How sensitive camera panning is to mouse movements.
+        scroll_sensitivity (float): How sensitive camera zooming is to scroll wheel.
+        drag_to_pan (bool): Whether dragging with mouse pans the camera.
+        max_num_saved_states (int): Maximum number of scene states to keep in history.
+        default_camera_config (dict): Default configuration for the camera.
+        default_file_writer_config (dict): Default configuration for file output.
+        samples (int): Number of samples for anti-aliasing.
+        default_frame_orientation (tuple): Default Euler angles for 3D scenes in degrees.
+    
+    Example:
+        >>> class MyScene(Scene):
+        ...     def construct(self):
+        ...         circle = Circle()
+        ...         self.add(circle)
+        ...         self.play(Create(circle))
+    """
     random_seed: int = 0
     pan_sensitivity: float = 0.5
     scroll_sensitivity: float = 20
