@@ -83,9 +83,17 @@ class Animation(object):
             raise TypeError("Animation only works for Mobjects.")
 
     def __str__(self) -> str:
+        """Return a string representation of the animation."""
         return self.name
 
     def begin(self) -> None:
+        """
+        Initialize the animation when it starts playing.
+        
+        This method is called right as an animation begins. It performs
+        initialization including creating starting mobject copies and
+        setting up families for interpolation.
+        """
         # This is called right as an animation is being
         # played.  As much initialization as possible,
         # especially any mobject copying, should live in
@@ -102,16 +110,37 @@ class Animation(object):
         self.interpolate(0)
 
     def finish(self) -> None:
+        """
+        Complete the animation when it ends.
+        
+        This method finalizes the animation by setting the final interpolation
+        value, updating animation status, and resuming mobject updating if needed.
+        """
         self.interpolate(self.final_alpha_value)
         self.mobject.set_animating_status(False)
         if self.suspend_mobject_updating and self.mobject_was_updating:
             self.mobject.resume_updating()
 
     def clean_up_from_scene(self, scene: Scene) -> None:
+        """
+        Clean up the animation's effects on the scene.
+        
+        If this is a remover animation, the mobject will be removed
+        from the scene after the animation completes.
+        
+        Args:
+            scene: The scene containing this animation.
+        """
         if self.is_remover():
             scene.remove(self.mobject)
 
     def create_starting_mobject(self) -> Mobject:
+        """
+        Create a copy of the mobject to track its starting state.
+        
+        Returns:
+            Mobject: A copy of the mobject at animation start.
+        """
         # Keep track of where the mobject starts
         return self.mobject.copy()
 
@@ -122,6 +151,12 @@ class Animation(object):
         return self.mobject, self.starting_mobject
 
     def get_all_families_zipped(self) -> zip[tuple[Mobject]]:
+        """
+        Get families of all mobjects involved in the animation, zipped together.
+        
+        Returns:
+            zip: Zipped families for coordinated animation of submobjects.
+        """
         return zip(*[
             mob.get_family()
             for mob in self.get_all_mobjects()

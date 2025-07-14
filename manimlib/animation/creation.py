@@ -30,7 +30,15 @@ if TYPE_CHECKING:
 
 class ShowPartial(Animation, ABC):
     """
-    Abstract class for ShowCreation and ShowPassingFlash
+    Abstract base class for animations that show partial mobjects.
+    
+    This class provides the foundation for animations like ShowCreation and 
+    ShowPassingFlash that reveal portions of mobjects progressively.
+    
+    Args:
+        mobject: The mobject to partially show.
+        should_match_start: Whether to match the starting state of the mobject.
+        **kwargs: Additional animation parameters.
     """
     def __init__(self, mobject: Mobject, should_match_start: bool = False, **kwargs):
         self.should_match_start = should_match_start
@@ -42,12 +50,32 @@ class ShowPartial(Animation, ABC):
         start_submob: VMobject,
         alpha: float
     ) -> None:
+        """
+        Interpolate a submobject to show partial state.
+        
+        Args:
+            submob: The submobject being animated.
+            start_submob: The starting state of the submobject.
+            alpha: Animation progress from 0 to 1.
+        """
         submob.pointwise_become_partial(
             start_submob, *self.get_bounds(alpha)
         )
 
     @abstractmethod
     def get_bounds(self, alpha: float) -> tuple[float, float]:
+        """
+        Get the bounds for partial display based on animation progress.
+        
+        Args:
+            alpha: Animation progress from 0 to 1.
+            
+        Returns:
+            tuple[float, float]: Start and end bounds for partial display.
+            
+        Raises:
+            Exception: Must be implemented by subclasses.
+        """
         raise Exception("Not Implemented")
 
 
@@ -71,10 +99,32 @@ class ShowCreation(ShowPartial):
         super().__init__(mobject, lag_ratio=lag_ratio, **kwargs)
 
     def get_bounds(self, alpha: float) -> tuple[float, float]:
+        """
+        Get bounds for progressive creation from start to current progress.
+        
+        Args:
+            alpha: Animation progress from 0 to 1.
+            
+        Returns:
+            tuple[float, float]: Always (0, alpha) for creation from beginning.
+        """
         return (0, alpha)
 
 
 class Uncreate(ShowCreation):
+    """
+    Animation that removes a mobject by reversing its creation.
+    
+    This animation progressively hides a mobject, as if erasing or uncreating it.
+    By default, it removes the mobject from the scene when complete.
+    
+    Args:
+        mobject: The mobject to uncreate.
+        rate_func: Rate function (default: reversed smooth function).
+        remover: Whether to remove the mobject from scene (default: True).
+        should_match_start: Whether to match starting state (default: True).
+        **kwargs: Additional animation parameters.
+    """
     def __init__(
         self,
         mobject: Mobject,
