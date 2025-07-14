@@ -1,3 +1,10 @@
+"""
+Indication and emphasis animations for drawing attention to objects.
+
+This module provides animations that highlight, emphasize, or draw attention
+to specific mobjects or points in a scene. These are useful for presentations
+and educational content where you need to focus the viewer's attention.
+"""
 from __future__ import annotations
 
 import numpy as np
@@ -39,6 +46,26 @@ if TYPE_CHECKING:
 
 
 class FocusOn(Transform):
+    """
+    Animation that creates a focusing effect on a specific point or mobject.
+    
+    This animation creates a large circle that shrinks down to a tiny dot at the
+    focus point, creating a visual "zoom in" or spotlight effect to draw attention.
+    
+    Args:
+        focus_point: The point or mobject to focus on.
+        opacity: Opacity of the focusing circle (default: 0.2).
+        color: Color of the focusing effect (default: GREY).
+        run_time: Duration of the animation (default: 2).
+        remover: Whether to remove the effect after animation (default: True).
+        **kwargs: Additional animation parameters.
+    
+    Example:
+        >>> equation = Tex("E = mc^2")
+        >>> self.play(FocusOn(equation))
+        >>> # Focus on a specific point
+        >>> self.play(FocusOn(ORIGIN, color=YELLOW))
+    """
     def __init__(
         self,
         focus_point: np.ndarray | Mobject,
@@ -56,12 +83,24 @@ class FocusOn(Transform):
         super().__init__(VMobject(), run_time=run_time, remover=remover, **kwargs)
 
     def create_target(self) -> Dot:
+        """
+        Create the target state (small dot at focus point).
+        
+        Returns:
+            Dot: A tiny dot at the focus point.
+        """
         little_dot = Dot(radius=0)
         little_dot.set_fill(self.color, opacity=self.opacity)
         little_dot.add_updater(lambda d: d.move_to(self.focus_point))
         return little_dot
 
     def create_starting_mobject(self) -> Dot:
+        """
+        Create the starting state (large circle covering the screen).
+        
+        Returns:
+            Dot: A large transparent circle.
+        """
         return Dot(
             radius=FRAME_X_RADIUS + FRAME_Y_RADIUS,
             stroke_width=0,
@@ -71,6 +110,25 @@ class FocusOn(Transform):
 
 
 class Indicate(Transform):
+    """
+    Animation that temporarily emphasizes a mobject by scaling and coloring it.
+    
+    This animation briefly scales up and changes the color of a mobject to
+    draw attention to it, then returns it to its original state.
+    
+    Args:
+        mobject: The mobject to emphasize.
+        scale_factor: How much to scale up the mobject (default: 1.2).
+        color: Color to highlight with (default: YELLOW).
+        rate_func: Rate function for the emphasis (default: there_and_back).
+        **kwargs: Additional animation parameters.
+    
+    Example:
+        >>> text = Text("Important!")
+        >>> self.play(Indicate(text))
+        >>> # Custom indication
+        >>> self.play(Indicate(circle, scale_factor=1.5, color=RED))
+    """
     def __init__(
         self,
         mobject: Mobject,

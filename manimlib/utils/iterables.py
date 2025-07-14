@@ -24,17 +24,50 @@ def remove_list_redundancies(lst: Sequence[T]) -> list[T]:
 
 def list_update(l1: Iterable[T], l2: Iterable[T]) -> list[T]:
     """
+    Combine two lists while maintaining order and removing duplicates.
+    
     Used instead of list(set(l1).update(l2)) to maintain order,
     making sure duplicates are removed from l1, not l2.
+    
+    Args:
+        l1: First list.
+        l2: Second list to merge.
+    
+    Returns:
+        Combined list with duplicates removed, preserving order.
     """
     return remove_list_redundancies([*l1, *l2])
 
 
 def list_difference_update(l1: Iterable[T], l2: Iterable[T]) -> list[T]:
+    """
+    Return elements from l1 that are not in l2.
+    
+    Args:
+        l1: List to filter.
+        l2: List of elements to exclude.
+    
+    Returns:
+        Elements from l1 not found in l2.
+    """
     return [e for e in l1 if e not in l2]
 
 
 def adjacent_n_tuples(objects: Sequence[T], n: int) -> zip[tuple[T, ...]]:
+    """
+    Create tuples of n adjacent elements from a sequence.
+    
+    Args:
+        objects: Sequence to create tuples from.
+        n: Number of elements per tuple.
+    
+    Returns:
+        Iterator of n-tuples of adjacent elements.
+    
+    Example:
+        >>> list(adjacent_n_tuples([1, 2, 3, 4], 3))
+        [(1, 2, 3), (2, 3, 4), (3, 4, 1), (4, 1, 2)]
+    """
     return zip(*[
         [*objects[k:], *objects[:k]]
         for k in range(n)
@@ -42,6 +75,19 @@ def adjacent_n_tuples(objects: Sequence[T], n: int) -> zip[tuple[T, ...]]:
 
 
 def adjacent_pairs(objects: Sequence[T]) -> zip[tuple[T, T]]:
+    """
+    Create pairs of adjacent elements from a sequence.
+    
+    Args:
+        objects: Sequence to create pairs from.
+    
+    Returns:
+        Iterator of adjacent pairs.
+    
+    Example:
+        >>> list(adjacent_pairs([1, 2, 3, 4]))
+        [(1, 2), (2, 3), (3, 4), (4, 1)]
+    """
     return adjacent_n_tuples(objects, 2)
 
 
@@ -76,6 +122,23 @@ def batch_by_property(
 
 
 def listify(obj: object) -> list:
+    """
+    Convert an object to a list, handling strings and iterables appropriately.
+    
+    Args:
+        obj: Object to convert to list.
+    
+    Returns:
+        List representation of the object.
+    
+    Example:
+        >>> listify("hello")
+        ["hello"]
+        >>> listify([1, 2, 3])
+        [1, 2, 3]
+        >>> listify(42)
+        [42]
+    """
     if isinstance(obj, str):
         return [obj]
     try:
@@ -85,12 +148,31 @@ def listify(obj: object) -> list:
 
 
 def shuffled(iterable: Iterable) -> list:
+    """
+    Return a shuffled copy of an iterable.
+    
+    Args:
+        iterable: Iterable to shuffle.
+    
+    Returns:
+        Shuffled list.
+    """
     as_list = list(iterable)
     random.shuffle(as_list)
     return as_list
 
 
 def resize_array(nparray: np.ndarray, length: int) -> np.ndarray:
+    """
+    Resize a numpy array to a specific length.
+    
+    Args:
+        nparray: Array to resize.
+        length: Target length.
+    
+    Returns:
+        Resized array with the specified length.
+    """
     if len(nparray) == length:
         return nparray
     return np.resize(nparray, (length, *nparray.shape[1:]))
