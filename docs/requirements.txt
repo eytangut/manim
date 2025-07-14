@@ -2,3 +2,4 @@ Sphinx>=5.0
 sphinx-copybutton
 furo
 Jinja2<3.1
+myst-parser

@@ -18,14 +18,18 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
     'sphinx_copybutton',
-    'manim_example_ext'
+    'manim_example_ext',
+    'myst_parser'
 ]
 
 autoclass_content = 'both'
 mathjax_path = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
 
 templates_path = ['_templates']
-source_suffix = '.rst'
+source_suffix = {
+    '.rst': None,
+    '.md': None,
+}
 master_doc = 'index'
 pygments_style = 'default'
 
