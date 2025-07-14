@@ -23,6 +23,31 @@ if TYPE_CHECKING:
 
 
 class Camera(object):
+    """
+    Handles rendering and viewport management for Manim scenes.
+    
+    The Camera is responsible for capturing the scene from a particular viewpoint,
+    managing rendering settings, and producing the final output frames.
+    
+    Args:
+        window (Optional[Window]): The window to render into.
+        background_image (Optional[str]): Path to background image file.
+        frame_config (dict): Configuration for the camera frame.
+        resolution (tuple): Output resolution as (width, height).
+        fps (int): Frames per second for animation timing.
+        background_color (ManimColor): Color of the background.
+        background_opacity (float): Opacity of the background (0.0-1.0).
+        max_allowable_norm (float): Maximum vector magnitude before rescaling.
+        image_mode (str): Image mode for output ("RGBA", "RGB", etc.).
+        n_channels (int): Number of color channels.
+        pixel_array_dtype (type): Data type for pixel arrays.
+        light_source_position (Vect3): Position of the light source for 3D rendering.
+        samples (int): Number of samples for multisampling antialiasing.
+    
+    Example:
+        >>> camera = Camera(resolution=(1920, 1080), fps=30)
+        >>> camera.set_background_color(WHITE)
+    """
     def __init__(
         self,
         window: Optional[Window] = None,

@@ -1,3 +1,17 @@
+"""
+Rate functions for controlling animation timing and easing.
+
+This module provides various rate functions that can be used to control
+the timing and easing of animations. Rate functions take a value t ∈ [0,1]
+representing linear animation progress and return a modified value that
+creates different acceleration/deceleration effects.
+
+Common rate functions include:
+- linear: Constant speed
+- smooth: Ease in and out (S-curve)
+- rush_into/rush_from: Quick acceleration or deceleration
+- there_and_back: Move forward then backward
+"""
 from __future__ import annotations
 
 import numpy as np
@@ -11,10 +25,31 @@ if TYPE_CHECKING:
 
 
 def linear(t: float) -> float:
+    """
+    Linear rate function - no easing.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+    
+    Returns:
+        The input value unchanged.
+    """
     return t
 
 
 def smooth(t: float) -> float:
+    """
+    Smooth rate function with ease-in and ease-out.
+    
+    Creates an S-curve with zero first and second derivatives at t=0 and t=1,
+    providing gentle acceleration and deceleration.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+    
+    Returns:
+        Smoothed progress value.
+    """
     # Zero first and second derivatives at t=0 and t=1.
     # Equivalent to bezier([0, 0, 0, 1, 1, 1])
     s = 1 - t
@@ -22,18 +57,54 @@ def smooth(t: float) -> float:
 
 
 def rush_into(t: float) -> float:
+    """
+    Rate function with rapid acceleration at the start.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+    
+    Returns:
+        Progress value with fast initial acceleration.
+    """
     return 2 * smooth(0.5 * t)
 
 
 def rush_from(t: float) -> float:
+    """
+    Rate function with rapid acceleration at the end.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+    
+    Returns:
+        Progress value with fast final acceleration.
+    """
     return 2 * smooth(0.5 * (t + 1)) - 1
 
 
 def slow_into(t: float) -> float:
+    """
+    Rate function with gradual ease-in.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+    
+    Returns:
+        Progress value with slow initial acceleration.
+    """
     return np.sqrt(1 - (1 - t) * (1 - t))
 
 
 def double_smooth(t: float) -> float:
+    """
+    Rate function with two smooth phases.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+    
+    Returns:
+        Progress value with two smooth acceleration curves.
+    """
     if t < 0.5:
         return 0.5 * smooth(2 * t)
     else:
@@ -41,6 +112,18 @@ def double_smooth(t: float) -> float:
 
 
 def there_and_back(t: float) -> float:
+    """
+    Rate function that goes from 0 to 1 and back to 0.
+    
+    Creates a motion that accelerates forward and then returns,
+    useful for oscillating or bouncing effects.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+    
+    Returns:
+        Progress value that peaks at t=0.5 and returns to 0.
+    """
     new_t = 2 * t if t < 0.5 else 2 * (1 - t)
     return smooth(new_t)
 

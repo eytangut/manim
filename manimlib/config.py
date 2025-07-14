@@ -1,3 +1,14 @@
+"""
+Configuration management for Manim.
+
+This module handles loading and parsing configuration from multiple sources:
+- Default configuration from default_config.yml
+- Custom configuration from custom_config.yml files
+- Command-line arguments and flags
+
+The configuration system allows users to customize rendering settings,
+output directories, style preferences, and animation parameters.
+"""
 from __future__ import annotations
 
 import argparse

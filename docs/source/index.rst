@@ -18,6 +18,7 @@ And here is a Chinese version of this documentation: https://docs.manim.org.cn/
    getting_started/configuration
    getting_started/example_scenes
    getting_started/structure
+   getting_started/troubleshooting
    getting_started/whatsnew
 
 .. toctree::
