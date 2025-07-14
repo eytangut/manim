@@ -12,7 +12,6 @@ release = ''
 
 extensions = [
     'sphinx.ext.todo',
-    'sphinx.ext.githubpages',
     'sphinx.ext.mathjax',
     'sphinx.ext.intersphinx',
     'sphinx.ext.autodoc', 
