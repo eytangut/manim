@@ -22,6 +22,30 @@ if TYPE_CHECKING:
 
 
 class Transform(Animation):
+    """
+    Animation that transforms one mobject into another.
+    
+    Transform animations smoothly morph one mobject into a target shape,
+    interpolating between corresponding points. This is one of the most
+    fundamental animation types in Manim.
+    
+    Args:
+        mobject: The mobject to transform.
+        target_mobject: The target shape to transform into.
+        path_arc: Arc angle for curved transformation paths (default: 0 for straight).
+        path_arc_axis: Axis around which to arc (default: OUT for z-axis).
+        path_func: Custom function for transformation path.
+        **kwargs: Additional animation parameters.
+    
+    Attributes:
+        replace_mobject_with_target_in_scene: Whether to replace the original
+            mobject with the target in the scene after animation.
+    
+    Example:
+        >>> circle = Circle()
+        >>> square = Square()
+        >>> self.play(Transform(circle, square))
+    """
     replace_mobject_with_target_in_scene: bool = False
 
     def __init__(
@@ -41,6 +65,12 @@ class Transform(Animation):
         self.init_path_func()
 
     def init_path_func(self) -> None:
+        """
+        Initialize the path function for the transformation.
+        
+        Sets up either a straight path or curved arc path based on
+        the path_arc parameter.
+        """
         if self.path_func is not None:
             return
         elif self.path_arc == 0:
@@ -76,11 +106,27 @@ class Transform(Animation):
         self.mobject.unlock_data()
 
     def create_target(self) -> Mobject:
+        """
+        Create the target mobject for the transformation.
+        
+        This method can be overridden in subclasses to generate
+        the target shape dynamically.
+        
+        Returns:
+            Mobject: The target mobject to transform into.
+        """
         # Has no meaningful effect here, but may be useful
         # in subclasses
         return self.target_mobject
 
     def check_target_mobject_validity(self) -> None:
+        """
+        Validate that the target mobject is properly defined.
+        
+        Raises:
+            Exception: If target_mobject is None and create_target
+                      is not properly implemented.
+        """
         if self.target_mobject is None:
             raise Exception(
                 f"{self.__class__.__name__}.create_target not properly implemented"

@@ -369,22 +369,27 @@ class CurvedDoubleArrow(CurvedArrow):
 
 
 class Circle(Arc):
-    '''
-    Creates a circle.
-    Parameters
-    -----
-    radius : float
-        Radius of the circle
-    arc_center : array_like
-        Center of the circle
-    Examples :
-            circle = Circle(radius=2, arc_center=(1,2,0))
-            circle = Circle(radius=3.14, arc_center=2 * LEFT + UP, color=DARK_BLUE)
-    Returns
-    -----
-    out : Circle object
-        A Circle object satisfying the specified parameters
-    '''
+    """
+    A circular geometric shape.
+    
+    Creates a circular path that can be filled, stroked, or animated.
+    Inherits from Arc with a full rotation (TAU radians).
+    
+    Args:
+        start_angle: Starting angle for the circle (default: 0).
+        stroke_color: Color of the circle's outline (default: RED).
+        **kwargs: Additional parameters passed to Arc (radius, arc_center, etc.).
+    
+    Examples:
+        >>> circle = Circle(radius=2, arc_center=(1,2,0))
+        >>> circle = Circle(radius=3.14, arc_center=2 * LEFT + UP, color=DARK_BLUE)
+        >>> # Create and animate a circle
+        >>> circle = Circle(radius=1, color=BLUE)
+        >>> self.play(ShowCreation(circle))
+    
+    Returns:
+        Circle: A Circle object satisfying the specified parameters.
+    """
 
     def __init__(
         self,
@@ -405,18 +410,45 @@ class Circle(Arc):
         stretch: bool = False,
         buff: float = MED_SMALL_BUFF
     ) -> Self:
+        """
+        Resize and reposition the circle to surround another mobject.
+        
+        Args:
+            mobject: The mobject to surround.
+            dim_to_match: Dimension to match (0 for width, 1 for height).
+            stretch: Whether to stretch the circle to match the shape.
+            buff: Buffer space around the mobject.
+            
+        Returns:
+            Self: The circle for method chaining.
+        """
         self.replace(mobject, dim_to_match, stretch)
         self.stretch((self.get_width() + 2 * buff) / self.get_width(), 0)
         self.stretch((self.get_height() + 2 * buff) / self.get_height(), 1)
         return self
 
     def point_at_angle(self, angle: float) -> Vect3:
+        """
+        Get the point on the circle at a specific angle.
+        
+        Args:
+            angle: Angle in radians from the start angle.
+            
+        Returns:
+            Vect3: Point on the circle at the specified angle.
+        """
         start_angle = self.get_start_angle()
         return self.point_from_proportion(
             ((angle - start_angle) % TAU) / TAU
         )
 
     def get_radius(self) -> float:
+        """
+        Get the radius of the circle.
+        
+        Returns:
+            float: The radius of the circle.
+        """
         return get_norm(self.get_start() - self.get_center())
 
 
@@ -1454,21 +1486,28 @@ class ArrowTip(Triangle):
 
 
 class Rectangle(Polygon):
-    '''
-    Creates a rectangle at the center of the screen.
-    Parameters
-    -----
-    width : float
-        Width of the rectangle
-    height : float
-        Height of the rectangle
-    Examples :
-            rectangle = Rectangle(width=3, height=4, color=BLUE)
-    Returns
-    -----
-    out : Rectangle object
-        A Rectangle object satisfying the specified parameters
-    '''
+    """
+    A rectangular geometric shape.
+    
+    Creates a rectangle positioned at the center of the coordinate system.
+    The rectangle is defined by its width and height dimensions.
+    
+    Args:
+        width: Width of the rectangle (default: 4.0).
+        height: Height of the rectangle (default: 2.0).
+        **kwargs: Additional parameters passed to Polygon (color, stroke_width, etc.).
+    
+    Examples:
+        >>> rectangle = Rectangle(width=3, height=4, color=BLUE)
+        >>> # Create a square (equal width and height)
+        >>> square = Rectangle(width=2, height=2, color=GREEN)
+        >>> # Animate a rectangle
+        >>> rect = Rectangle(width=5, height=1, color=RED)
+        >>> self.play(ShowCreation(rect))
+    
+    Returns:
+        Rectangle: A Rectangle object satisfying the specified parameters.
+    """
 
     def __init__(
         self,
@@ -1481,6 +1520,16 @@ class Rectangle(Polygon):
         self.set_height(height, stretch=True)
 
     def surround(self, mobject, buff=SMALL_BUFF) -> Self:
+        """
+        Resize and reposition the rectangle to surround another mobject.
+        
+        Args:
+            mobject: The mobject to surround.
+            buff: Buffer space around the mobject.
+            
+        Returns:
+            Self: The rectangle for method chaining.
+        """
         target_shape = np.array(mobject.get_shape()) + 2 * buff
         self.set_shape(*target_shape)
         self.move_to(mobject)

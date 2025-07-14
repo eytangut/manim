@@ -63,6 +63,16 @@ def initialize_manim_config() -> Dict:
 
 
 def parse_cli():
+    """
+    Parse command line interface arguments for Manim.
+    
+    This function defines and parses all command line arguments that can be 
+    passed to Manim, including file paths, scene names, rendering options,
+    quality settings, and various configuration flags.
+    
+    Returns:
+        argparse.Namespace: Parsed command line arguments.
+    """
     try:
         parser = argparse.ArgumentParser()
         module_location = parser.add_mutually_exclusive_group()
