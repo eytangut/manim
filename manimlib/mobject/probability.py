@@ -1,3 +1,11 @@
+"""
+Probability and statistics visualization mobjects.
+
+This module provides specialized mobjects for visualizing probability concepts,
+including sample spaces, probability distributions, and statistical charts.
+These are useful for creating educational content about probability theory.
+"""
+
 from __future__ import annotations
 
 import numpy as np
@@ -26,6 +34,40 @@ EPSILON = 0.0001
 
 
 class SampleSpace(Rectangle):
+    """
+    A rectangular representation of a probability sample space.
+    
+    This mobject represents the sample space in probability theory - the set
+    of all possible outcomes. It can be divided into regions representing
+    different events and their probabilities.
+    
+    Parameters
+    ----------
+    width : float, optional
+        Width of the sample space (default: 3)
+    height : float, optional
+        Height of the sample space (default: 3)
+    fill_color : ManimColor, optional
+        Fill color (default: GREY_D)
+    fill_opacity : float, optional
+        Fill opacity (default: 1)
+    stroke_width : float, optional
+        Border width (default: 0.5)
+    stroke_color : ManimColor, optional
+        Border color (default: GREY_B)
+    default_label_scale_val : float, optional
+        Default scale for labels (default: 1)
+    **kwargs
+        Additional arguments passed to parent Rectangle class
+        
+    Examples
+    --------
+    Create a sample space for coin flips:
+    
+    >>> space = SampleSpace()
+    >>> space.divide_horizontally([0.5, 0.5])
+    >>> space.add_title("Coin Flip Sample Space")
+    """
     def __init__(
         self,
         width: float = 3,
@@ -52,6 +94,16 @@ class SampleSpace(Rectangle):
         title: str = "Sample space",
         buff: float = MED_SMALL_BUFF
     ) -> None:
+        """
+        Add a title above the sample space.
+        
+        Parameters
+        ----------
+        title : str, optional
+            Title text (default: "Sample space")
+        buff : float, optional
+            Buffer distance from the sample space (default: MED_SMALL_BUFF)
+        """
         # TODO, should this really exist in SampleSpaceScene
         title_mob = TexText(title)
         if title_mob.get_width() > self.get_width():
@@ -61,9 +113,23 @@ class SampleSpace(Rectangle):
         self.add(title_mob)
 
     def add_label(self, label: str) -> None:
+        """Add a text label to the sample space."""
         self.label = label
 
     def complete_p_list(self, p_list: list[float]) -> list[float]:
+        """
+        Complete a probability list to sum to 1.0.
+        
+        Parameters
+        ----------
+        p_list : list[float]
+            List of probabilities
+            
+        Returns
+        -------
+        list[float]
+            Completed probability list that sums to 1.0
+        """
         new_p_list = listify(p_list)
         remainder = 1.0 - sum(new_p_list)
         if abs(remainder) > EPSILON:
@@ -77,6 +143,25 @@ class SampleSpace(Rectangle):
         colors: Iterable[ManimColor],
         vect: np.ndarray
     ) -> VGroup:
+        """
+        Divide the sample space along a specified dimension.
+        
+        Parameters
+        ----------
+        p_list : list[float]
+            List of probability proportions
+        dim : int
+            Dimension to divide along (0=horizontal, 1=vertical)
+        colors : Iterable[ManimColor]
+            Colors for each division
+        vect : np.ndarray
+            Direction vector for the division
+            
+        Returns
+        -------
+        VGroup
+            Group of divided sample space parts
+        """
         p_list = self.complete_p_list(p_list)
         colors = color_gradient(colors, len(p_list))
 
@@ -98,6 +183,7 @@ class SampleSpace(Rectangle):
         colors: Iterable[ManimColor] = [GREEN_E, BLUE_E],
         vect: np.ndarray = DOWN
     ) -> VGroup:
+        """Get a horizontal division of the sample space."""
         return self.get_division_along_dimension(p_list, 1, colors, vect)
 
     def get_vertical_division(
@@ -106,13 +192,16 @@ class SampleSpace(Rectangle):
         colors: Iterable[ManimColor] = [MAROON_B, YELLOW],
         vect: np.ndarray = RIGHT
     ) -> VGroup:
+        """Get a vertical division of the sample space."""
         return self.get_division_along_dimension(p_list, 0, colors, vect)
 
     def divide_horizontally(self, *args, **kwargs) -> None:
+        """Divide the sample space horizontally and add the parts."""
         self.horizontal_parts = self.get_horizontal_division(*args, **kwargs)
         self.add(self.horizontal_parts)
 
     def divide_vertically(self, *args, **kwargs) -> None:
+        """Divide the sample space vertically and add the parts."""
         self.vertical_parts = self.get_vertical_division(*args, **kwargs)
         self.add(self.vertical_parts)
 
@@ -123,6 +212,25 @@ class SampleSpace(Rectangle):
         direction: np.ndarray,
         buff: float = SMALL_BUFF,
     ) -> VGroup:
+        """
+        Create braces and labels for subdivisions.
+        
+        Parameters
+        ----------
+        parts : VGroup
+            The subdivided parts
+        labels : str
+            Labels for each part
+        direction : np.ndarray
+            Direction for the braces
+        buff : float, optional
+            Buffer distance (default: SMALL_BUFF)
+            
+        Returns
+        -------
+        VGroup
+            Group containing braces and labels
+        """
         label_mobs = VGroup()
         braces = VGroup()
         for label, part in zip(labels, parts):
@@ -154,6 +262,7 @@ class SampleSpace(Rectangle):
         direction: np.ndarray = LEFT,
         **kwargs
     ) -> VGroup:
+        """Get braces and labels for the side of horizontal divisions."""
         assert hasattr(self, "horizontal_parts")
         parts = self.horizontal_parts
         return self.get_subdivision_braces_and_labels(parts, labels, direction, **kwargs)
@@ -163,6 +272,7 @@ class SampleSpace(Rectangle):
         labels: str,
         **kwargs
     ) -> VGroup:
+        """Get braces and labels for the top of vertical divisions."""
         assert hasattr(self, "vertical_parts")
         parts = self.vertical_parts
         return self.get_subdivision_braces_and_labels(parts, labels, UP, **kwargs)
@@ -172,11 +282,13 @@ class SampleSpace(Rectangle):
         labels: str,
         **kwargs
     ) -> VGroup:
+        """Get braces and labels for the bottom of vertical divisions."""
         assert hasattr(self, "vertical_parts")
         parts = self.vertical_parts
         return self.get_subdivision_braces_and_labels(parts, labels, DOWN, **kwargs)
 
     def add_braces_and_labels(self) -> None:
+        """Add any existing braces and labels to the sample space."""
         for attr in "horizontal_parts", "vertical_parts":
             if not hasattr(self, attr):
                 continue
@@ -186,6 +298,7 @@ class SampleSpace(Rectangle):
                     self.add(getattr(parts, subattr))
 
     def __getitem__(self, index: int | slice) -> VGroup:
+        """Get parts of the sample space by index."""
         if hasattr(self, "horizontal_parts"):
             return self.horizontal_parts[index]
         elif hasattr(self, "vertical_parts"):
@@ -194,6 +307,57 @@ class SampleSpace(Rectangle):
 
 
 class BarChart(VGroup):
+    """
+    A bar chart for displaying statistical data.
+    
+    This creates a traditional bar chart with axes, tick marks, labels,
+    and colored bars representing different data values. Useful for
+    displaying statistical information and comparisons.
+    
+    Parameters
+    ----------
+    values : Iterable[float]
+        The data values to display as bars
+    height : float, optional
+        Total height of the chart (default: 4)
+    width : float, optional
+        Total width of the chart (default: 6)
+    n_ticks : int, optional
+        Number of tick marks on y-axis (default: 4)
+    include_x_ticks : bool, optional
+        Whether to include x-axis tick marks (default: False)
+    tick_width : float, optional
+        Width of tick marks (default: 0.2)
+    tick_height : float, optional
+        Height of tick marks (default: 0.15)
+    label_y_axis : bool, optional
+        Whether to label y-axis values (default: True)
+    y_axis_label_height : float, optional
+        Height of y-axis labels (default: 0.25)
+    max_value : float, optional
+        Maximum value for y-axis scaling (default: 1)
+    bar_colors : list[ManimColor], optional
+        Colors to use for bars (default: [BLUE, YELLOW])
+    bar_fill_opacity : float, optional
+        Opacity of bar fills (default: 0.8)
+    bar_stroke_width : float, optional
+        Width of bar borders (default: 3)
+    bar_names : list[str], optional
+        Names for each bar (default: [])
+    bar_label_scale_val : float, optional
+        Scale factor for bar labels (default: 0.75)
+    **kwargs
+        Additional arguments passed to parent VGroup class
+        
+    Examples
+    --------
+    Create a simple bar chart:
+    
+    >>> values = [0.3, 0.7, 0.5, 0.9]
+    >>> names = ["A", "B", "C", "D"]
+    >>> chart = BarChart(values, bar_names=names)
+    >>> self.add(chart)
+    """
     def __init__(
         self,
         values: Iterable[float],
