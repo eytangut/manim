@@ -28,6 +28,9 @@ MOCK_MODULES = [
     'scipy', 'sympy', 'decorator', 'tqdm', 'mapbox_earcut',
     'srt', 'rich', 'click', 'watchdog', 'isosurfaces',
     'addict', 'appdirs', 'diskcache', 'fontTools',
+    'numpy', 'PIL', 'OpenGL', 'OpenGL.GL', 'matplotlib',
+    'matplotlib.pyplot', 'scipy.spatial', 'scipy.spatial.distance',
+    'pandas', 'screeninfo', 'pyperclip', 'aggdraw', 'validators'
 ]
 
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
