@@ -698,22 +698,28 @@ class Annulus(VMobject):
 
 
 class Line(TipableVMobject):
-    '''
-    Creates a line joining the points "start" and "end".
-    Parameters
-    -----
-    start : array_like
-        Starting point of the line
-    end : array_like
-        Ending point of the line
-    Examples :
-            line = Line((0, 0, 0), (3, 0, 0))
-            line = Line((1, 2, 0), (-2, -3, 0), color=BLUE)
-    Returns
-    -----
-    out : Line object
-        A Line object satisfying the specified parameters
-    '''
+    """
+    A straight line segment between two points.
+    
+    Creates a line connecting a start point to an end point, with optional
+    curvature and buffer space. Lines can have arrow tips, custom colors,
+    and various styling options.
+    
+    Args:
+        start: Starting point of the line or Mobject to connect from (default: LEFT).
+        end: Ending point of the line or Mobject to connect to (default: RIGHT).
+        buff: Buffer space to leave at start and end (default: 0.0).
+        path_arc: Curvature of the line in radians (0 = straight) (default: 0.0).
+        **kwargs: Additional parameters for styling (color, stroke_width, etc.).
+    
+    Example:
+        >>> line = Line(ORIGIN, 2*UP + RIGHT, color=BLUE)
+        >>> line = Line(circle1, circle2, buff=0.1)  # Connect two mobjects
+        >>> curved_line = Line(start=(0,0,0), end=(3,0,0), path_arc=PI/4)
+    
+    Returns:
+        Line: A line segment with the specified properties.
+    """
 
     def __init__(
         self,
@@ -736,6 +742,18 @@ class Line(TipableVMobject):
         buff: float = 0,
         path_arc: float = 0
     ) -> Self:
+        """
+        Set the line's points based on start and end positions.
+        
+        Args:
+            start: Starting point of the line.
+            end: Ending point of the line.
+            buff: Buffer space to leave at ends.
+            path_arc: Curvature of the line.
+        
+        Returns:
+            Self: The line object for method chaining.
+        """
         self.clear_points()
         self.start_new_path(start)
         self.add_arc_to(end, path_arc)
@@ -1062,46 +1080,32 @@ class StrokeArrow(Line):
 
 
 class Arrow(Line):
-    '''
-    Creates an arrow.
-
-    Parameters
-    ----------
-    start : array_like
-        Starting point of the arrow
-    end : array_like
-        Ending point of the arrow 
-    buff : float, optional
-        Buffer distance from the start and end points. Default is MED_SMALL_BUFF.
-    path_arc : float, optional
-        If set to a non-zero value, the arrow will be curved to subtend a circle by this angle.
-        Default is 0 (straight arrow).
-    thickness : float, optional
-        How wide should the base of the arrow be. This affects the shaft width. Default is 3.0.
-    tip_width_ratio : float, optional
-        Ratio of the tip width to the shaft width. Default is 5.
-    tip_angle : float, optional
-        Angle of the arrow tip in radians. Default is PI/3 (60 degrees).
-    max_tip_length_to_length_ratio : float, optional
-        Maximum ratio of tip length to total arrow length. Prevents tips from being too large
-        relative to the arrow. Default is 0.5.
-    max_width_to_length_ratio : float, optional
-        Maximum ratio of arrow width to total arrow length. Prevents arrows from being too wide
-        relative to their length. Default is 0.1.
-    **kwargs
-        Additional keyword arguments passed to the parent Line class.
-
-    Examples
-    --------
-    >>> arrow = Arrow((0, 0, 0), (3, 0, 0))
-    >>> curved_arrow = Arrow(LEFT, RIGHT, path_arc=PI/4)
-    >>> thick_arrow = Arrow(UP, DOWN, thickness=5.0, tip_width_ratio=3)
-
-    Returns
-    -------
-    Arrow
-        An Arrow object satisfying the specified parameters.
-    '''
+    """
+    An arrow pointing from one location to another.
+    
+    Creates a line with an arrowhead at the end point. Arrows can be straight
+    or curved, and have customizable thickness, tip size, and angle.
+    
+    Args:
+        start: Starting point of the arrow (default: LEFT).
+        end: Ending point of the arrow (default: LEFT).
+        buff: Buffer distance from start and end points (default: MED_SMALL_BUFF).
+        path_arc: Curvature angle in radians (0 = straight) (default: 0).
+        thickness: Width of the arrow shaft (default: 3.0).
+        tip_width_ratio: Ratio of tip width to shaft width (default: 5).
+        tip_angle: Angle of the arrow tip in radians (default: PI/3).
+        max_tip_length_to_length_ratio: Maximum tip length ratio (default: 0.5).
+        max_width_to_length_ratio: Maximum width ratio (default: 0.1).
+        **kwargs: Additional styling parameters.
+    
+    Example:
+        >>> arrow = Arrow(ORIGIN, 2*RIGHT, color=RED)
+        >>> curved_arrow = Arrow(LEFT, RIGHT, path_arc=PI/4)
+        >>> thick_arrow = Arrow(UP, DOWN, thickness=5.0, tip_width_ratio=3)
+    
+    Returns:
+        Arrow: An arrow with the specified properties.
+    """
 
     tickness_multiplier = 0.015
 
@@ -1550,40 +1554,50 @@ class Rectangle(Polygon):
 
 
 class Square(Rectangle):
-    '''
-    Creates a square at the center of the screen.
-    Parameters
-    -----
-    side_length : float
-        Edge length of the square
-    Examples :
-            square = Square(side_length=5, color=PINK)
-    Returns
-    -----
-    out : Square object
-        A Square object satisfying the specified parameters
-    '''
+    """
+    A square geometric shape.
+    
+    Creates a square (rectangle with equal width and height) positioned at
+    the center of the coordinate system.
+    
+    Args:
+        side_length: Length of each side of the square (default: 2.0).
+        **kwargs: Additional parameters passed to Rectangle (color, stroke_width, etc.).
+    
+    Example:
+        >>> square = Square(side_length=3, color=PINK)
+        >>> self.add(square)
+    
+    Returns:
+        Square: A square with the specified side length.
+    """
 
     def __init__(self, side_length: float = 2.0, **kwargs):
         super().__init__(side_length, side_length, **kwargs)
 
 
 class RoundedRectangle(Rectangle):
-    '''
-    Creates a rectangle with round edges at the center of the screen.
-    Parameters
-    -----
-    width : float
-        Width of the rounded rectangle
-    height : float
-        Height of the rounded rectangle
-    corner_radius : float
-        Corner radius of the rectangle
-    Examples :
-            rRectangle = RoundedRectangle(width=3, height=4, corner_radius=1, color=BLUE)
-    Returns
-    -----
-    out : RoundedRectangle object
+    """
+    A rectangle with rounded corners.
+    
+    Creates a rectangle with curved corners, useful for creating buttons,
+    panels, or other UI elements with softer edges.
+    
+    Args:
+        width: Width of the rounded rectangle (default: 4.0).
+        height: Height of the rounded rectangle (default: 2.0).
+        corner_radius: Radius of the rounded corners (default: 0.5).
+        **kwargs: Additional parameters passed to Rectangle.
+    
+    Example:
+        >>> rounded_rect = RoundedRectangle(
+        ...     width=3, height=2, corner_radius=0.3, color=BLUE
+        ... )
+        >>> self.add(rounded_rect)
+    
+    Returns:
+        RoundedRectangle: A rectangle with rounded corners.
+    """
         A RoundedRectangle object satisfying the specified parameters
     '''
 

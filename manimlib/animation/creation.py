@@ -213,6 +213,28 @@ class DrawBorderThenFill(Animation):
 
 
 class Write(DrawBorderThenFill):
+    """
+    Animation that writes text or shapes as if being drawn by hand.
+    
+    This animation is specifically designed for text and mathematical expressions,
+    writing them progressively character by character or stroke by stroke.
+    The timing adapts based on the complexity of the content.
+    
+    Args:
+        vmobject: The text or VMobject to write.
+        run_time: Duration of animation (auto-calculated if negative).
+        lag_ratio: Timing between submobjects (auto-calculated if negative).
+        rate_func: Rate function controlling timing (default: linear).
+        stroke_color: Color for writing stroke (default: object's color).
+        **kwargs: Additional animation parameters.
+    
+    Example:
+        >>> text = Text("Hello World")
+        >>> self.play(Write(text))
+        >>> # For mathematical expressions
+        >>> formula = MathTex("E = mc^2")
+        >>> self.play(Write(formula))
+    """
     def __init__(
         self,
         vmobject: VMobject,
@@ -235,11 +257,31 @@ class Write(DrawBorderThenFill):
         )
 
     def compute_run_time(self, family_size: int, run_time: float):
+        """
+        Automatically calculate run time based on content complexity.
+        
+        Args:
+            family_size: Number of submobjects to write.
+            run_time: Specified run time (if positive).
+        
+        Returns:
+            Appropriate run time for the content.
+        """
         if run_time < 0:
             return 1 if family_size < 15 else 2
         return run_time
 
     def compute_lag_ratio(self, family_size: int, lag_ratio: float):
+        """
+        Automatically calculate lag ratio for smooth writing.
+        
+        Args:
+            family_size: Number of submobjects to write.
+            lag_ratio: Specified lag ratio (if positive).
+        
+        Returns:
+            Appropriate lag ratio for smooth timing.
+        """
         if lag_ratio < 0:
             return min(4.0 / (family_size + 1.0), 0.2)
         return lag_ratio
