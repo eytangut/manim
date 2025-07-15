@@ -1,3 +1,11 @@
+"""
+Shape matching utilities for creating visual indicators and highlighting.
+
+This module provides mobjects that automatically match and highlight other
+mobjects, including surrounding rectangles, background rectangles, crosses
+for marking, and underlines for emphasis.
+"""
+
 from __future__ import annotations
 
 from colour import Color
@@ -20,6 +28,32 @@ if TYPE_CHECKING:
 
 
 class SurroundingRectangle(Rectangle):
+    """
+    A rectangle that automatically sizes itself to surround another mobject.
+    
+    This is useful for highlighting or drawing attention to specific mobjects
+    in a scene. The rectangle maintains a specified buffer distance from the
+    mobject's boundary.
+    
+    Parameters
+    ----------
+    mobject : Mobject
+        The mobject to surround
+    buff : float, optional
+        Buffer distance from the mobject boundary (default: SMALL_BUFF)
+    color : ManimColor, optional
+        Color of the surrounding rectangle (default: YELLOW)
+    **kwargs
+        Additional arguments passed to parent Rectangle class
+        
+    Examples
+    --------
+    Highlight a text mobject:
+    
+    >>> text = Text("Important!")
+    >>> highlight = SurroundingRectangle(text, color=RED)
+    >>> self.add(text, highlight)
+    """
     def __init__(
         self,
         mobject: Mobject,
@@ -34,18 +68,78 @@ class SurroundingRectangle(Rectangle):
             self.fix_in_frame()
 
     def surround(self, mobject, buff=None) -> Self:
+        """
+        Update the rectangle to surround a new mobject.
+        
+        Parameters
+        ----------
+        mobject : Mobject
+            The mobject to surround
+        buff : float, optional
+            New buffer distance (uses current buff if None)
+            
+        Returns
+        -------
+        Self
+            Returns self for method chaining
+        """
         self.mobject = mobject
         self.buff = buff if buff is not None else self.buff
         super().surround(mobject, self.buff)
         return self
 
     def set_buff(self, buff) -> Self:
+        """
+        Set a new buffer distance and update the surrounding rectangle.
+        
+        Parameters
+        ----------
+        buff : float
+            New buffer distance from the mobject
+            
+        Returns
+        -------
+        Self
+            Returns self for method chaining
+        """
         self.buff = buff
         self.surround(self.mobject)
         return self
 
 
 class BackgroundRectangle(SurroundingRectangle):
+    """
+    A rectangle that provides a background behind a mobject.
+    
+    This is useful for ensuring text or objects are readable over complex
+    backgrounds. The rectangle automatically matches the background color
+    and provides opacity control.
+    
+    Parameters
+    ----------
+    mobject : Mobject
+        The mobject to provide background for
+    color : ManimColor, optional
+        Background color (uses scene background if None)
+    stroke_width : float, optional
+        Width of the border stroke (default: 0)
+    stroke_opacity : float, optional
+        Opacity of the border stroke (default: 0)
+    fill_opacity : float, optional
+        Opacity of the background fill (default: 0.75)
+    buff : float, optional
+        Buffer distance from the mobject (default: 0)
+    **kwargs
+        Additional arguments passed to parent SurroundingRectangle class
+        
+    Examples
+    --------
+    Add background to text for readability:
+    
+    >>> text = Text("Clear Text")
+    >>> background = BackgroundRectangle(text, fill_opacity=0.8)
+    >>> self.add(background, text)
+    """
     def __init__(
         self,
         mobject: Mobject,
@@ -70,6 +164,7 @@ class BackgroundRectangle(SurroundingRectangle):
         self.original_fill_opacity = fill_opacity
 
     def pointwise_become_partial(self, mobject: Mobject, a: float, b: float) -> Self:
+        """Update fill opacity based on partial animation progress."""
         self.set_fill(opacity=b * self.original_fill_opacity)
         return self
 
@@ -82,6 +177,12 @@ class BackgroundRectangle(SurroundingRectangle):
         family: bool = True,
         **kwargs
     ) -> Self:
+        """
+        Set style properties, with fixed stroke settings.
+        
+        Only fill_opacity can be changed, other properties are fixed
+        to maintain the background appearance.
+        """
         # Unchangeable style, except for fill_opacity
         VMobject.set_style(
             self,
@@ -93,10 +194,36 @@ class BackgroundRectangle(SurroundingRectangle):
         return self
 
     def get_fill_color(self) -> Color:
+        """Get the fill color as a Color object."""
         return Color(self.color)
 
 
 class Cross(VGroup):
+    """
+    Two intersecting lines that form an X shape over a mobject.
+    
+    This is useful for marking objects as crossed out, deleted, or incorrect.
+    The cross automatically sizes itself to match the target mobject.
+    
+    Parameters
+    ----------
+    mobject : Mobject
+        The mobject to place the cross over
+    stroke_color : ManimColor, optional
+        Color of the cross lines (default: RED)
+    stroke_width : float | Sequence[float], optional
+        Width of the cross lines (default: [0, 6, 0] for tapered effect)
+    **kwargs
+        Additional arguments passed to parent VGroup class
+        
+    Examples
+    --------
+    Mark an equation as incorrect:
+    
+    >>> equation = MathTex("2 + 2 = 5")
+    >>> cross = Cross(equation, stroke_color=RED)
+    >>> self.add(equation, cross)
+    """
     def __init__(
         self,
         mobject: Mobject,
@@ -114,6 +241,36 @@ class Cross(VGroup):
 
 
 class Underline(Line):
+    """
+    A line that appears underneath a mobject to provide emphasis.
+    
+    This is commonly used to emphasize text or mathematical expressions.
+    The underline automatically positions itself below the target mobject
+    with customizable styling.
+    
+    Parameters
+    ----------
+    mobject : Mobject
+        The mobject to underline
+    buff : float, optional
+        Distance below the mobject (default: SMALL_BUFF)
+    stroke_color : ManimColor, optional
+        Color of the underline (default: DEFAULT_MOBJECT_COLOR)
+    stroke_width : float | Sequence[float], optional
+        Width of the underline (default: [0, 3, 3, 0] for tapered ends)
+    stretch_factor : float, optional
+        Factor to stretch the underline width relative to mobject (default: 1.2)
+    **kwargs
+        Additional arguments passed to parent Line class
+        
+    Examples
+    --------
+    Emphasize important text:
+    
+    >>> text = Text("Important Point")
+    >>> underline = Underline(text, stroke_color=BLUE)
+    >>> self.add(text, underline)
+    """
     def __init__(
         self,
         mobject: Mobject,

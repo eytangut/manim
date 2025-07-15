@@ -1,6 +1,17 @@
+"""
+Mathematical Animation Library (Manim).
+
+This is a comprehensive library for creating mathematical animations,
+developed by 3Blue1Brown. It provides tools for creating scenes with
+mathematical objects, animations, and rendering them to video.
+"""
+
 import pkg_resources
 
-__version__ = pkg_resources.get_distribution("manimgl").version
+try:
+    __version__ = pkg_resources.get_distribution("manimgl").version
+except pkg_resources.DistributionNotFound:
+    __version__ = "1.0.0"
 
 from typing import TYPE_CHECKING
 

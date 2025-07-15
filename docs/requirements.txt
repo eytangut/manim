@@ -1,5 +1,5 @@
-Sphinx>=5.0
-sphinx-copybutton
-furo
-Jinja2<3.1
-myst-parser
+# Manim Documentation Requirements
+
+sphinx>=4.0.0
+sphinx-rtd-theme>=1.0.0
+sphinx-autodoc-typehints>=1.12.0
