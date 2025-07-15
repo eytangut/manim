@@ -176,10 +176,41 @@ class Transform(Animation):
 
 
 class ReplacementTransform(Transform):
+    """
+    Transform that replaces the original mobject with the target in the scene.
+    
+    Unlike the base Transform class, this animation removes the original mobject
+    from the scene and adds the target mobject when the animation completes.
+    This is useful when you want the transformation to be permanent.
+    
+    Example:
+        >>> circle = Circle()
+        >>> square = Square()
+        >>> self.play(ReplacementTransform(circle, square))
+        # The circle is completely replaced by the square
+    """
     replace_mobject_with_target_in_scene: bool = True
 
 
 class TransformFromCopy(Transform):
+    """
+    Transform from a copy of the source mobject to the target.
+    
+    This creates a copy of the source mobject and transforms that copy
+    into the target, leaving the original source unchanged in the scene.
+    The copy replaces the original in the scene after animation.
+    
+    Args:
+        mobject: The source mobject to copy and transform.
+        target_mobject: The target shape to transform into.
+        **kwargs: Additional animation parameters.
+    
+    Example:
+        >>> circle = Circle()
+        >>> square = Square()
+        >>> self.play(TransformFromCopy(circle, square))
+        # A copy of circle transforms into square, original circle remains
+    """
     replace_mobject_with_target_in_scene: bool = True
 
     def __init__(self, mobject: Mobject, target_mobject: Mobject, **kwargs):
@@ -187,11 +218,35 @@ class TransformFromCopy(Transform):
 
 
 class MoveToTarget(Transform):
+    """
+    Transform a mobject to its .target attribute.
+    
+    This is a convenience class for when you've set a mobject's target
+    attribute and want to animate the transformation to that target.
+    
+    Args:
+        mobject: The mobject to animate. Must have a .target attribute.
+        **kwargs: Additional animation parameters.
+    
+    Example:
+        >>> circle = Circle()
+        >>> circle.target = circle.copy().shift(RIGHT)
+        >>> self.play(MoveToTarget(circle))
+    """
     def __init__(self, mobject: Mobject, **kwargs):
         self.check_validity_of_input(mobject)
         super().__init__(mobject, mobject.target, **kwargs)
 
     def check_validity_of_input(self, mobject: Mobject) -> None:
+        """
+        Verify that the mobject has a target attribute.
+        
+        Args:
+            mobject: The mobject to check.
+            
+        Raises:
+            Exception: If the mobject doesn't have a target attribute.
+        """
         if not hasattr(mobject, "target"):
             raise Exception(
                 "MoveToTarget called on mobject without attribute 'target'"
@@ -199,20 +254,53 @@ class MoveToTarget(Transform):
 
 
 class _MethodAnimation(MoveToTarget):
+    """
+    Internal animation class for applying multiple methods to a mobject.
+    
+    This is used internally for chaining multiple method calls into a
+    single animation. Users should typically use ApplyMethod instead.
+    
+    Args:
+        mobject: The mobject to animate.
+        methods: List of methods to apply to the mobject.
+        **kwargs: Additional animation parameters.
+    """
     def __init__(self, mobject: Mobject, methods: list[Callable], **kwargs):
         self.methods = methods
         super().__init__(mobject, **kwargs)
 
 
 class ApplyMethod(Transform):
+    """
+    Transform created by applying a method to a mobject.
+    
+    This animation takes a mobject method and animates the transformation
+    from the current state to the state after applying that method.
+    The method must return the mobject for chaining.
+    
+    Args:
+        method: A bound method of a Mobject instance.
+        *args: Arguments to pass to the method.
+        **kwargs: Animation configuration parameters.
+    
+    Example:
+        >>> circle = Circle()
+        >>> self.play(ApplyMethod(circle.shift, UP))
+        >>> # Or equivalently:
+        >>> self.play(circle.animate.shift(UP))
+    """
     def __init__(self, method: Callable, *args, **kwargs):
         """
-        method is a method of Mobject, *args are arguments for
-        that method.  Key word arguments should be passed in
-        as the last arg, as a dict, since **kwargs is for
-        configuration of the transform itself
-
-        Relies on the fact that mobject methods return the mobject
+        Initialize the ApplyMethod animation.
+        
+        Args:
+            method: A method of Mobject to apply.
+            *args: Arguments for that method.
+            **kwargs: Animation configuration parameters.
+        
+        Note:
+            The method relies on mobject methods returning the mobject
+            for method chaining to work properly.
         """
         self.check_validity_of_input(method)
         self.method = method
@@ -220,6 +308,15 @@ class ApplyMethod(Transform):
         super().__init__(method.__self__, **kwargs)
 
     def check_validity_of_input(self, method: Callable) -> None:
+        """
+        Validate that the input is a proper bound method.
+        
+        Args:
+            method: The method to validate.
+            
+        Raises:
+            Exception: If the method is not a bound method or not bound to a Mobject.
+        """
         if not inspect.ismethod(method):
             raise Exception(
                 "Whoops, looks like you accidentally invoked "
@@ -228,6 +325,15 @@ class ApplyMethod(Transform):
         assert isinstance(method.__self__, Mobject)
 
     def create_target(self) -> Mobject:
+        """
+        Create the target mobject by applying the method.
+        
+        Creates a copy of the source mobject and applies the specified
+        method with the given arguments to generate the target state.
+        
+        Returns:
+            Mobject: The target mobject after applying the method.
+        """
         method = self.method
         # Make sure it's a list so that args.pop() works
         args = list(self.method_args)
@@ -242,6 +348,26 @@ class ApplyMethod(Transform):
 
 
 class ApplyPointwiseFunction(ApplyMethod):
+    """
+    Transform that applies a function to each point of a mobject.
+    
+    This animation applies a given function to every point in the mobject's
+    data, creating a smooth transformation from the original to the modified shape.
+    
+    Args:
+        function: A function that takes a point (3D numpy array) and returns
+                 a transformed point.
+        mobject: The mobject to transform.
+        run_time: Duration of the animation (default: 3.0 seconds).
+        **kwargs: Additional animation parameters.
+    
+    Example:
+        >>> circle = Circle()
+        >>> def wave_function(point):
+        ...     x, y, z = point
+        ...     return [x, y + 0.5 * np.sin(2 * x), z]
+        >>> self.play(ApplyPointwiseFunction(wave_function, circle))
+    """
     def __init__(
         self,
         function: Callable[[np.ndarray], np.ndarray],
@@ -253,6 +379,25 @@ class ApplyPointwiseFunction(ApplyMethod):
 
 
 class ApplyPointwiseFunctionToCenter(Transform):
+    """
+    Transform that applies a function only to the center of a mobject.
+    
+    This animation moves the mobject so that its center is transformed
+    by the given function, while maintaining the mobject's shape and orientation.
+    
+    Args:
+        function: A function that takes a center point and returns a new center.
+        mobject: The mobject to move.
+        **kwargs: Additional animation parameters.
+    
+    Example:
+        >>> circle = Circle()
+        >>> def spiral_function(point):
+        ...     x, y, z = point
+        ...     angle = np.sqrt(x**2 + y**2)
+        ...     return [x * np.cos(angle), y * np.sin(angle), z]
+        >>> self.play(ApplyPointwiseFunctionToCenter(spiral_function, circle))
+    """
     def __init__(
         self,
         function: Callable[[np.ndarray], np.ndarray],
@@ -263,10 +408,31 @@ class ApplyPointwiseFunctionToCenter(Transform):
         super().__init__(mobject, **kwargs)
 
     def create_target(self) -> Mobject:
+        """
+        Create target by applying function to the mobject's center.
+        
+        Returns:
+            Mobject: A copy of the mobject moved to the transformed center.
+        """
         return self.mobject.copy().move_to(self.function(self.mobject.get_center()))
 
 
 class FadeToColor(ApplyMethod):
+    """
+    Animation that changes a mobject's color.
+    
+    This is a convenience class for animating color changes, equivalent
+    to using ApplyMethod with the set_color method.
+    
+    Args:
+        mobject: The mobject whose color to change.
+        color: The target color.
+        **kwargs: Additional animation parameters.
+    
+    Example:
+        >>> circle = Circle(color=BLUE)
+        >>> self.play(FadeToColor(circle, RED))
+    """
     def __init__(
         self,
         mobject: Mobject,
@@ -277,6 +443,21 @@ class FadeToColor(ApplyMethod):
 
 
 class ScaleInPlace(ApplyMethod):
+    """
+    Animation that scales a mobject about its center.
+    
+    This is a convenience class for scaling animations, equivalent
+    to using ApplyMethod with the scale method.
+    
+    Args:
+        mobject: The mobject to scale.
+        scale_factor: The scaling factor (float or array-like for per-axis scaling).
+        **kwargs: Additional animation parameters.
+    
+    Example:
+        >>> circle = Circle()
+        >>> self.play(ScaleInPlace(circle, 2))  # Double the size
+    """
     def __init__(
         self,
         mobject: Mobject,

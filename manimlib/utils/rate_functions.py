@@ -129,6 +129,18 @@ def there_and_back(t: float) -> float:
 
 
 def there_and_back_with_pause(t: float, pause_ratio: float = 1. / 3) -> float:
+    """
+    Rate function that goes forward, pauses, then returns.
+    
+    Like there_and_back but with a pause at the peak position.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+        pause_ratio: Fraction of time to pause at the peak (default: 1/3).
+    
+    Returns:
+        Progress value with pause at the peak.
+    """
     a = 2. / (1. - pause_ratio)
     if t < 0.5 - pause_ratio / 2:
         return smooth(a * t)
@@ -139,10 +151,36 @@ def there_and_back_with_pause(t: float, pause_ratio: float = 1. / 3) -> float:
 
 
 def running_start(t: float, pull_factor: float = -0.5) -> float:
+    """
+    Rate function with a "running start" - moves backward before accelerating forward.
+    
+    Creates an effect like winding up before launching, where the animation
+    briefly moves in the opposite direction before proceeding.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+        pull_factor: How far to pull back (negative values pull backward).
+    
+    Returns:
+        Progress value with running start effect.
+    """
     return bezier([0, 0, pull_factor, pull_factor, 1, 1, 1])(t)
 
 
 def overshoot(t: float, pull_factor: float = 1.5) -> float:
+    """
+    Rate function that overshoots the target before settling.
+    
+    Creates a bouncing or springy effect by going past the target
+    before returning to the final position.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+        pull_factor: How much to overshoot (values > 1 overshoot).
+    
+    Returns:
+        Progress value with overshoot effect.
+    """
     return bezier([0, 0, pull_factor, pull_factor, 1, 1])(t)
 
 
@@ -150,12 +188,37 @@ def not_quite_there(
     func: Callable[[float], float] = smooth,
     proportion: float = 0.7
 ) -> Callable[[float], float]:
+    """
+    Create a rate function that doesn't quite reach the target.
+    
+    Multiplies another rate function by a proportion less than 1,
+    creating animations that approach but don't fully reach their target.
+    
+    Args:
+        func: The base rate function to modify.
+        proportion: Fraction of the target to reach (default: 0.7).
+    
+    Returns:
+        A new rate function that reaches only the specified proportion.
+    """
     def result(t):
         return proportion * func(t)
     return result
 
 
 def wiggle(t: float, wiggles: float = 2) -> float:
+    """
+    Rate function that creates a wiggling/oscillating effect.
+    
+    Combines there_and_back motion with sinusoidal oscillation.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+        wiggles: Number of wiggle cycles (default: 2).
+    
+    Returns:
+        Progress value with wiggling effect.
+    """
     return there_and_back(t) * np.sin(wiggles * np.pi * t)
 
 

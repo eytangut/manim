@@ -53,6 +53,9 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
     'sphinx.ext.githubpages',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -74,6 +77,15 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# Custom CSS and JavaScript files
+html_css_files = [
+    'custom.css',
+]
+
+html_js_files = [
+    'custom.js',
+]
 
 # -- Options for autodoc ----------------------------------------------------
 
@@ -105,3 +117,52 @@ napoleon_use_rtype = True
 # -- Options for autosummary ------------------------------------------------
 
 autosummary_generate = True
+
+# -- Options for intersphinx -------------------------------------------------
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'matplotlib': ('https://matplotlib.org/stable/', None),
+}
+
+# -- Options for todo extension ---------------------------------------------
+
+todo_include_todos = True
+
+# -- HTML theme options -----------------------------------------------------
+
+html_theme_options = {
+    'canonical_url': '',
+    'analytics_id': '',
+    'logo_only': False,
+    'display_version': True,
+    'prev_next_buttons_location': 'both',
+    'style_external_links': True,
+    'style_nav_header_background': '#3498db',
+    'collapse_navigation': False,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False,
+}
+
+# Add custom footer
+html_context = {
+    'display_github': True,
+    'github_user': 'eytangut',
+    'github_repo': 'manim',
+    'github_version': 'main',
+    'conf_py_path': '/docs/',
+}
+
+# Sidebar templates
+html_sidebars = {
+    '**': [
+        'about.html',
+        'navigation.html',
+        'relations.html',
+        'searchbox.html',
+        'donate.html',
+    ]
+}
