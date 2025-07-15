@@ -14,16 +14,18 @@ And here is a Chinese version of this documentation: https://docs.manim.org.cn/
 
    getting_started/installation
    getting_started/quickstart
+   getting_started/tutorial
    getting_started/configuration
    getting_started/example_scenes
-   getting_started/config
    getting_started/structure
+   getting_started/troubleshooting
    getting_started/whatsnew
 
 .. toctree::
    :maxdepth: 2
    :caption: Documentation
 
+   documentation/api_reference
    documentation/constants
    documentation/custom_config
 

@@ -1,40 +1,72 @@
-name: docs
+name: Build and Deploy Documentation
 
-on: 
+on:
   push:
+    branches: [ main, master ]
     paths:
       - 'docs/**'
+      - 'manimlib/**'
   pull_request:
+    branches: [ main, master ]
     paths:
       - 'docs/**'
+      - 'manimlib/**'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  docs:
+  build:
     runs-on: ubuntu-latest
-    name: build up document and deploy
-
+    
     steps:
-    - name: Checkout
-      uses: actions/checkout@master
+    - uses: actions/checkout@v4
     
-    - name: Install sphinx and manim env
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install system dependencies
       run: |
-        pip3 install --upgrade pip
-        sudo apt install python3-setuptools libpango1.0-dev
-        pip3 install -r docs/requirements.txt
-        pip3 install -r requirements.txt
+        sudo apt-get update
+        sudo apt-get install -y libpango1.0-dev python3-setuptools
     
-    - name: Build document with Sphinx
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r docs/requirements.txt
+        pip install -r requirements.txt
+        pip install -e .
+    
+    - name: Build documentation
       run: |
         cd docs
-        export PATH="$PATH:/home/runner/.local/bin"
-        export SPHINXBUILD="python3 -m sphinx"
         make html
-        
-    - name: Deploy to GitHub pages
-      if: ${{ github.event_name == 'push' }}
-      uses: JamesIves/github-pages-deploy-action@3.7.1
+        touch _build/html/.nojekyll
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
+      
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v2
       with:
-        ACCESS_TOKEN: ${{ secrets.DOC_DEPLOY_TOKEN }}
-        BRANCH: gh-pages
-        FOLDER: docs/build/html
+        path: './docs/_build/html'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2

@@ -50,6 +50,30 @@ if TYPE_CHECKING:
 
 
 class Scene(object):
+    """
+    The fundamental building block for all Manim scenes.
+    
+    A Scene is the main container for all Mobjects (Mathematical Objects) and animations.
+    It manages the camera, rendering, and playback of animations.
+    
+    Attributes:
+        random_seed (int): Seed for random number generation to ensure reproducibility.
+        pan_sensitivity (float): How sensitive camera panning is to mouse movements.
+        scroll_sensitivity (float): How sensitive camera zooming is to scroll wheel.
+        drag_to_pan (bool): Whether dragging with mouse pans the camera.
+        max_num_saved_states (int): Maximum number of scene states to keep in history.
+        default_camera_config (dict): Default configuration for the camera.
+        default_file_writer_config (dict): Default configuration for file output.
+        samples (int): Number of samples for anti-aliasing.
+        default_frame_orientation (tuple): Default Euler angles for 3D scenes in degrees.
+    
+    Example:
+        >>> class MyScene(Scene):
+        ...     def construct(self):
+        ...         circle = Circle()
+        ...         self.add(circle)
+        ...         self.play(Create(circle))
+    """
     random_seed: int = 0
     pan_sensitivity: float = 0.5
     scroll_sensitivity: float = 20
@@ -141,12 +165,26 @@ class Scene(object):
             np.random.seed(self.random_seed)
 
     def __str__(self) -> str:
+        """Return the name of the scene class."""
         return self.__class__.__name__
 
     def get_window(self) -> Window | None:
+        """
+        Get the window associated with this scene.
+        
+        Returns:
+            Window or None: The Pyglet window if one exists, otherwise None.
+        """
         return self.window
 
     def run(self) -> None:
+        """
+        Execute the complete scene lifecycle: setup, construction, and cleanup.
+        
+        This method orchestrates the entire scene execution by calling setup(),
+        construct(), interact(), and tear_down() in sequence. It also handles
+        keyboard interrupts gracefully.
+        """
         self.virtual_animation_start_time: float = 0
         self.real_animation_start_time: float = time.time()
         self.file_writer.begin()
@@ -172,11 +210,30 @@ class Scene(object):
         pass
 
     def construct(self) -> None:
+        """
+        The main method where scene content is defined.
+        
+        This method should be overridden in subclasses to define what
+        happens in the scene. All mobjects, animations, and scene logic
+        should be placed here.
+        
+        Example:
+            >>> def construct(self):
+            ...     circle = Circle()
+            ...     self.add(circle)
+            ...     self.play(Create(circle))
+        """
         # Where all the animation happens
         # To be implemented in subclasses
         pass
 
     def tear_down(self) -> None:
+        """
+        Clean up the scene after execution completes.
+        
+        This method stops any ongoing animations, finalizes file output,
+        and destroys the window if one exists.
+        """
         self.stop_skipping()
         self.file_writer.finish()
         if self.window:
@@ -205,6 +262,16 @@ class Scene(object):
         close_scene_on_exit: bool = True,
         show_animation_progress: bool = False,
     ) -> None:
+        """
+        Enter an interactive IPython session within the scene context.
+        
+        This allows for live interaction with the scene, enabling users to
+        modify mobjects, run animations, and experiment interactively.
+        
+        Args:
+            close_scene_on_exit: Whether to end the scene when exiting the embed.
+            show_animation_progress: Whether to show progress bars during animations.
+        """
         if not self.window:
             # Embed is only relevant for interactive development with a Window
             return
@@ -221,6 +288,12 @@ class Scene(object):
     # Only these methods should touch the camera
 
     def get_image(self) -> Image:
+        """
+        Capture the current frame as a PIL Image.
+        
+        Returns:
+            PIL.Image: The current rendered frame as an image object.
+        """
         if self.window is not None:
             self.camera.use_window_fbo(False)
             self.camera.capture(*self.render_groups)
@@ -230,10 +303,27 @@ class Scene(object):
         return image
 
     def show(self) -> None:
+        """
+        Display the current scene frame in the system's default image viewer.
+        
+        This captures the current state of the scene and opens it in an external
+        image viewing application.
+        """
         self.update_frame(force_draw=True)
         self.get_image().show()
 
     def update_frame(self, dt: float = 0, force_draw: bool = False) -> None:
+        """
+        Update and render a single frame of the scene.
+        
+        This method advances time, updates all mobjects, and renders the frame
+        to the screen and/or file output. It handles timing synchronization
+        and skipping logic.
+        
+        Args:
+            dt: Time delta in seconds since the last frame.
+            force_draw: Whether to force rendering even when skipping animations.
+        """
         self.increment_time(dt)
         self.update_mobjects(dt)
         if self.skip_animations and not force_draw:
@@ -256,16 +346,38 @@ class Scene(object):
             time.sleep(max(vt - rt, 0))
 
     def emit_frame(self) -> None:
+        """
+        Write the current frame to the output file.
+        
+        This method is called during animation playback to save frames
+        to the video file. Frames are only written when not skipping animations.
+        """
         if not self.skip_animations:
             self.file_writer.write_frame(self.camera)
 
     # Related to updating
 
     def update_mobjects(self, dt: float) -> None:
+        """
+        Update all mobjects in the scene for the current frame.
+        
+        This calls the update method on every mobject in the scene,
+        allowing them to animate based on updater functions.
+        
+        Args:
+            dt: Time delta in seconds since the last update.
+        """
         for mobject in self.mobjects:
             mobject.update(dt)
 
     def should_update_mobjects(self) -> bool:
+        """
+        Determine whether mobjects need to be updated this frame.
+        
+        Returns:
+            bool: True if any mobject has updater functions or if 
+                  always_update_mobjects is enabled.
+        """
         return self.always_update_mobjects or any(
             mob.has_updaters() for mob in self.mobjects
         )
@@ -273,14 +385,35 @@ class Scene(object):
     # Related to time
 
     def get_time(self) -> float:
+        """
+        Get the current scene time in seconds.
+        
+        Returns:
+            float: The total elapsed time since scene started.
+        """
         return self.time
 
     def increment_time(self, dt: float) -> None:
+        """
+        Advance the scene's internal time counter.
+        
+        Args:
+            dt: Time delta in seconds to add to the current time.
+        """
         self.time += dt
 
     # Related to internal mobject organization
 
     def get_top_level_mobjects(self) -> list[Mobject]:
+        """
+        Get mobjects that are not contained within other mobjects.
+        
+        Returns only mobjects that are not part of the family of another
+        mobject in the scene, effectively filtering out submobjects.
+        
+        Returns:
+            list[Mobject]: Top-level mobjects in the scene.
+        """
         # Return only those which are not in the family
         # of another mobject from the scene
         mobjects = self.get_mobjects()
@@ -295,13 +428,21 @@ class Scene(object):
         return list(filter(is_top_level, mobjects))
 
     def get_mobject_family_members(self) -> list[Mobject]:
+        """
+        Get all mobjects including their family members (submobjects).
+        
+        Returns:
+            list[Mobject]: All mobjects and their submobjects in the scene.
+        """
         return extract_mobject_family_members(self.mobjects)
 
     def assemble_render_groups(self):
         """
-        Rendering can be more efficient when mobjects of the
-        same type are grouped together, so this function creates
-        Groups of all clusters of adjacent Mobjects in the scene
+        Group mobjects by type and properties for efficient rendering.
+        
+        Rendering can be more efficient when mobjects of the same type are 
+        grouped together, so this function creates Groups of all clusters 
+        of adjacent Mobjects in the scene with similar rendering properties.
         """
         batches = batch_by_property(
             self.mobjects,
@@ -317,6 +458,18 @@ class Scene(object):
 
     @staticmethod
     def affects_mobject_list(func: Callable[..., T]) -> Callable[..., T]:
+        """
+        Decorator that ensures render groups are reassembled after modifying mobject list.
+        
+        This decorator should be applied to any method that modifies the scene's
+        mobject list to ensure that rendering groups are properly updated.
+        
+        Args:
+            func: The function to wrap.
+            
+        Returns:
+            Callable: The wrapped function that updates render groups.
+        """
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             func(self, *args, **kwargs)
@@ -346,9 +499,16 @@ class Scene(object):
 
     def add_mobjects_among(self, values: Iterable):
         """
-        This is meant mostly for quick prototyping,
-        e.g. to add all mobjects defined up to a point,
-        call self.add_mobjects_among(locals().values())
+        Add all mobjects found within an iterable collection.
+        
+        This is meant mostly for quick prototyping, e.g. to add all mobjects 
+        defined up to a point, call self.add_mobjects_among(locals().values()).
+        
+        Args:
+            values: An iterable containing potential mobjects to add.
+            
+        Returns:
+            Scene: Self for method chaining.
         """
         self.add(*filter(
             lambda m: isinstance(m, Mobject),
@@ -358,6 +518,16 @@ class Scene(object):
 
     @affects_mobject_list
     def replace(self, mobject: Mobject, *replacements: Mobject):
+        """
+        Replace a mobject in the scene with one or more other mobjects.
+        
+        Args:
+            mobject: The mobject to replace.
+            *replacements: The mobjects to replace it with.
+            
+        Returns:
+            Scene: Self for method chaining.
+        """
         if mobject in self.mobjects:
             index = self.mobjects.index(mobject)
             self.mobjects = [
@@ -383,28 +553,73 @@ class Scene(object):
 
     @affects_mobject_list
     def remove_all_except(self, *mobjects_to_keep : Mobject):
+        """
+        Remove all mobjects from the scene except those specified.
+        
+        Args:
+            *mobjects_to_keep: Mobjects that should remain in the scene.
+            
+        Returns:
+            Scene: Self for method chaining.
+        """
         self.clear()
         self.add(*mobjects_to_keep)
 
     def bring_to_front(self, *mobjects: Mobject):
+        """
+        Move mobjects to the front of the rendering order.
+        
+        Args:
+            *mobjects: Mobjects to bring to front.
+            
+        Returns:
+            Scene: Self for method chaining.
+        """
         self.add(*mobjects)
         return self
 
     @affects_mobject_list
     def bring_to_back(self, *mobjects: Mobject):
+        """
+        Move mobjects to the back of the rendering order.
+        
+        Args:
+            *mobjects: Mobjects to bring to back.
+            
+        Returns:
+            Scene: Self for method chaining.
+        """
         self.remove(*mobjects)
         self.mobjects = list(mobjects) + self.mobjects
         return self
 
     @affects_mobject_list
     def clear(self):
+        """
+        Remove all mobjects from the scene.
+        
+        Returns:
+            Scene: Self for method chaining.
+        """
         self.mobjects = []
         return self
 
     def get_mobjects(self) -> list[Mobject]:
+        """
+        Get a copy of the scene's mobject list.
+        
+        Returns:
+            list[Mobject]: A list of all mobjects in the scene.
+        """
         return list(self.mobjects)
 
     def get_mobject_copies(self) -> list[Mobject]:
+        """
+        Get copies of all mobjects in the scene.
+        
+        Returns:
+            list[Mobject]: A list of copied mobjects from the scene.
+        """
         return [m.copy() for m in self.mobjects]
 
     def point_to_mobject(

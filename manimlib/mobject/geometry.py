@@ -369,22 +369,27 @@ class CurvedDoubleArrow(CurvedArrow):
 
 
 class Circle(Arc):
-    '''
-    Creates a circle.
-    Parameters
-    -----
-    radius : float
-        Radius of the circle
-    arc_center : array_like
-        Center of the circle
-    Examples :
-            circle = Circle(radius=2, arc_center=(1,2,0))
-            circle = Circle(radius=3.14, arc_center=2 * LEFT + UP, color=DARK_BLUE)
-    Returns
-    -----
-    out : Circle object
-        A Circle object satisfying the specified parameters
-    '''
+    """
+    A circular geometric shape.
+    
+    Creates a circular path that can be filled, stroked, or animated.
+    Inherits from Arc with a full rotation (TAU radians).
+    
+    Args:
+        start_angle: Starting angle for the circle (default: 0).
+        stroke_color: Color of the circle's outline (default: RED).
+        **kwargs: Additional parameters passed to Arc (radius, arc_center, etc.).
+    
+    Examples:
+        >>> circle = Circle(radius=2, arc_center=(1,2,0))
+        >>> circle = Circle(radius=3.14, arc_center=2 * LEFT + UP, color=DARK_BLUE)
+        >>> # Create and animate a circle
+        >>> circle = Circle(radius=1, color=BLUE)
+        >>> self.play(ShowCreation(circle))
+    
+    Returns:
+        Circle: A Circle object satisfying the specified parameters.
+    """
 
     def __init__(
         self,
@@ -405,36 +410,72 @@ class Circle(Arc):
         stretch: bool = False,
         buff: float = MED_SMALL_BUFF
     ) -> Self:
+        """
+        Resize and reposition the circle to surround another mobject.
+        
+        Args:
+            mobject: The mobject to surround.
+            dim_to_match: Dimension to match (0 for width, 1 for height).
+            stretch: Whether to stretch the circle to match the shape.
+            buff: Buffer space around the mobject.
+            
+        Returns:
+            Self: The circle for method chaining.
+        """
         self.replace(mobject, dim_to_match, stretch)
         self.stretch((self.get_width() + 2 * buff) / self.get_width(), 0)
         self.stretch((self.get_height() + 2 * buff) / self.get_height(), 1)
         return self
 
     def point_at_angle(self, angle: float) -> Vect3:
+        """
+        Get the point on the circle at a specific angle.
+        
+        Args:
+            angle: Angle in radians from the start angle.
+            
+        Returns:
+            Vect3: Point on the circle at the specified angle.
+        """
         start_angle = self.get_start_angle()
         return self.point_from_proportion(
             ((angle - start_angle) % TAU) / TAU
         )
 
     def get_radius(self) -> float:
+        """
+        Get the radius of the circle.
+        
+        Returns:
+            float: The radius of the circle.
+        """
         return get_norm(self.get_start() - self.get_center())
 
 
 class Dot(Circle):
-    '''
-    Creates a dot. Dot is a filled white circle with no bounary and DEFAULT_DOT_RADIUS.
-    Parameters
-    -----
-    point : array_like
-        Coordinates of center of the dot.
-    Examples :
-            dot = Dot(point=(1, 2, 0))
-
-    Returns
-    -----
-    out : Dot object
-        A Dot object satisfying the specified parameters
-    '''
+    """
+    A filled circle representing a point or dot.
+    
+    Creates a small filled circle, typically used to mark points or positions
+    in mathematical visualizations. The dot has no stroke by default and is
+    filled with the default mobject color.
+    
+    Args:
+        point: Coordinates of the center of the dot (default: ORIGIN).
+        radius: Radius of the dot (default: DEFAULT_DOT_RADIUS).
+        stroke_color: Color of the outline (default: BLACK).
+        stroke_width: Width of the outline stroke (default: 0.0).
+        fill_opacity: Opacity of the fill (default: 1.0).
+        fill_color: Color of the fill (default: DEFAULT_MOBJECT_COLOR).
+        **kwargs: Additional parameters passed to Circle.
+    
+    Example:
+        >>> dot = Dot(point=2*UP + RIGHT, radius=0.1, fill_color=RED)
+        >>> self.add(dot)
+    
+    Returns:
+        Dot: A filled circle representing a point.
+    """
 
     def __init__(
         self,
@@ -458,20 +499,24 @@ class Dot(Circle):
 
 
 class SmallDot(Dot):
-    '''
-    Creates a small dot. Small dot is a filled white circle with no bounary and DEFAULT_SMALL_DOT_RADIUS.
-    Parameters
-    -----
-    point : array_like
-        Coordinates of center of the small dot.
-    Examples :
-            smallDot = SmallDot(point=(1, 2, 0))
-
-    Returns
-    -----
-    out : SmallDot object
-        A SmallDot object satisfying the specified parameters
-    '''
+    """
+    A smaller version of a Dot for fine details.
+    
+    Creates a small filled circle with the default small dot radius,
+    useful for marking fine points or creating detailed diagrams.
+    
+    Args:
+        point: Coordinates of the center of the small dot (default: ORIGIN).
+        radius: Radius of the dot (default: DEFAULT_SMALL_DOT_RADIUS).
+        **kwargs: Additional parameters passed to Dot.
+    
+    Example:
+        >>> small_dot = SmallDot(point=UP + RIGHT, fill_color=BLUE)
+        >>> self.add(small_dot)
+    
+    Returns:
+        SmallDot: A small filled circle representing a point.
+    """
 
     def __init__(
         self,
@@ -483,24 +528,24 @@ class SmallDot(Dot):
 
 
 class Ellipse(Circle):
-    '''
-    Creates an ellipse.
-    Parameters
-    -----
-    width : float
-        Width of the ellipse
-    height : float
-        Height of the ellipse
-    arc_center : array_like
-        Coordinates of center of the ellipse
-    Examples :
-            ellipse = Ellipse(width=4, height=1, arc_center=(3, 3, 0))
-            ellipse = Ellipse(width=2, height=5, arc_center=ORIGIN, color=BLUE)
-    Returns
-    -----
-    out : Ellipse object
-        An Ellipse object satisfying the specified parameters
-    '''
+    """
+    An elliptical geometric shape.
+    
+    Creates an ellipse by scaling a circle differently in width and height.
+    Useful for creating oval shapes and elongated circular objects.
+    
+    Args:
+        width: Width of the ellipse (default: 2.0).
+        height: Height of the ellipse (default: 1.0).
+        **kwargs: Additional parameters passed to Circle (arc_center, color, etc.).
+    
+    Example:
+        >>> ellipse = Ellipse(width=4, height=1, arc_center=(3, 3, 0))
+        >>> ellipse = Ellipse(width=2, height=5, arc_center=ORIGIN, color=BLUE)
+    
+    Returns:
+        Ellipse: An elliptical shape with the specified dimensions.
+    """
 
     def __init__(
         self,
@@ -653,22 +698,28 @@ class Annulus(VMobject):
 
 
 class Line(TipableVMobject):
-    '''
-    Creates a line joining the points "start" and "end".
-    Parameters
-    -----
-    start : array_like
-        Starting point of the line
-    end : array_like
-        Ending point of the line
-    Examples :
-            line = Line((0, 0, 0), (3, 0, 0))
-            line = Line((1, 2, 0), (-2, -3, 0), color=BLUE)
-    Returns
-    -----
-    out : Line object
-        A Line object satisfying the specified parameters
-    '''
+    """
+    A straight line segment between two points.
+    
+    Creates a line connecting a start point to an end point, with optional
+    curvature and buffer space. Lines can have arrow tips, custom colors,
+    and various styling options.
+    
+    Args:
+        start: Starting point of the line or Mobject to connect from (default: LEFT).
+        end: Ending point of the line or Mobject to connect to (default: RIGHT).
+        buff: Buffer space to leave at start and end (default: 0.0).
+        path_arc: Curvature of the line in radians (0 = straight) (default: 0.0).
+        **kwargs: Additional parameters for styling (color, stroke_width, etc.).
+    
+    Example:
+        >>> line = Line(ORIGIN, 2*UP + RIGHT, color=BLUE)
+        >>> line = Line(circle1, circle2, buff=0.1)  # Connect two mobjects
+        >>> curved_line = Line(start=(0,0,0), end=(3,0,0), path_arc=PI/4)
+    
+    Returns:
+        Line: A line segment with the specified properties.
+    """
 
     def __init__(
         self,
@@ -691,6 +742,18 @@ class Line(TipableVMobject):
         buff: float = 0,
         path_arc: float = 0
     ) -> Self:
+        """
+        Set the line's points based on start and end positions.
+        
+        Args:
+            start: Starting point of the line.
+            end: Ending point of the line.
+            buff: Buffer space to leave at ends.
+            path_arc: Curvature of the line.
+        
+        Returns:
+            Self: The line object for method chaining.
+        """
         self.clear_points()
         self.start_new_path(start)
         self.add_arc_to(end, path_arc)
@@ -1017,46 +1080,32 @@ class StrokeArrow(Line):
 
 
 class Arrow(Line):
-    '''
-    Creates an arrow.
-
-    Parameters
-    ----------
-    start : array_like
-        Starting point of the arrow
-    end : array_like
-        Ending point of the arrow 
-    buff : float, optional
-        Buffer distance from the start and end points. Default is MED_SMALL_BUFF.
-    path_arc : float, optional
-        If set to a non-zero value, the arrow will be curved to subtend a circle by this angle.
-        Default is 0 (straight arrow).
-    thickness : float, optional
-        How wide should the base of the arrow be. This affects the shaft width. Default is 3.0.
-    tip_width_ratio : float, optional
-        Ratio of the tip width to the shaft width. Default is 5.
-    tip_angle : float, optional
-        Angle of the arrow tip in radians. Default is PI/3 (60 degrees).
-    max_tip_length_to_length_ratio : float, optional
-        Maximum ratio of tip length to total arrow length. Prevents tips from being too large
-        relative to the arrow. Default is 0.5.
-    max_width_to_length_ratio : float, optional
-        Maximum ratio of arrow width to total arrow length. Prevents arrows from being too wide
-        relative to their length. Default is 0.1.
-    **kwargs
-        Additional keyword arguments passed to the parent Line class.
-
-    Examples
-    --------
-    >>> arrow = Arrow((0, 0, 0), (3, 0, 0))
-    >>> curved_arrow = Arrow(LEFT, RIGHT, path_arc=PI/4)
-    >>> thick_arrow = Arrow(UP, DOWN, thickness=5.0, tip_width_ratio=3)
-
-    Returns
-    -------
-    Arrow
-        An Arrow object satisfying the specified parameters.
-    '''
+    """
+    An arrow pointing from one location to another.
+    
+    Creates a line with an arrowhead at the end point. Arrows can be straight
+    or curved, and have customizable thickness, tip size, and angle.
+    
+    Args:
+        start: Starting point of the arrow (default: LEFT).
+        end: Ending point of the arrow (default: LEFT).
+        buff: Buffer distance from start and end points (default: MED_SMALL_BUFF).
+        path_arc: Curvature angle in radians (0 = straight) (default: 0).
+        thickness: Width of the arrow shaft (default: 3.0).
+        tip_width_ratio: Ratio of tip width to shaft width (default: 5).
+        tip_angle: Angle of the arrow tip in radians (default: PI/3).
+        max_tip_length_to_length_ratio: Maximum tip length ratio (default: 0.5).
+        max_width_to_length_ratio: Maximum width ratio (default: 0.1).
+        **kwargs: Additional styling parameters.
+    
+    Example:
+        >>> arrow = Arrow(ORIGIN, 2*RIGHT, color=RED)
+        >>> curved_arrow = Arrow(LEFT, RIGHT, path_arc=PI/4)
+        >>> thick_arrow = Arrow(UP, DOWN, thickness=5.0, tip_width_ratio=3)
+    
+    Returns:
+        Arrow: An arrow with the specified properties.
+    """
 
     tickness_multiplier = 0.015
 
@@ -1454,21 +1503,28 @@ class ArrowTip(Triangle):
 
 
 class Rectangle(Polygon):
-    '''
-    Creates a rectangle at the center of the screen.
-    Parameters
-    -----
-    width : float
-        Width of the rectangle
-    height : float
-        Height of the rectangle
-    Examples :
-            rectangle = Rectangle(width=3, height=4, color=BLUE)
-    Returns
-    -----
-    out : Rectangle object
-        A Rectangle object satisfying the specified parameters
-    '''
+    """
+    A rectangular geometric shape.
+    
+    Creates a rectangle positioned at the center of the coordinate system.
+    The rectangle is defined by its width and height dimensions.
+    
+    Args:
+        width: Width of the rectangle (default: 4.0).
+        height: Height of the rectangle (default: 2.0).
+        **kwargs: Additional parameters passed to Polygon (color, stroke_width, etc.).
+    
+    Examples:
+        >>> rectangle = Rectangle(width=3, height=4, color=BLUE)
+        >>> # Create a square (equal width and height)
+        >>> square = Rectangle(width=2, height=2, color=GREEN)
+        >>> # Animate a rectangle
+        >>> rect = Rectangle(width=5, height=1, color=RED)
+        >>> self.play(ShowCreation(rect))
+    
+    Returns:
+        Rectangle: A Rectangle object satisfying the specified parameters.
+    """
 
     def __init__(
         self,
@@ -1481,6 +1537,16 @@ class Rectangle(Polygon):
         self.set_height(height, stretch=True)
 
     def surround(self, mobject, buff=SMALL_BUFF) -> Self:
+        """
+        Resize and reposition the rectangle to surround another mobject.
+        
+        Args:
+            mobject: The mobject to surround.
+            buff: Buffer space around the mobject.
+            
+        Returns:
+            Self: The rectangle for method chaining.
+        """
         target_shape = np.array(mobject.get_shape()) + 2 * buff
         self.set_shape(*target_shape)
         self.move_to(mobject)
@@ -1488,40 +1554,50 @@ class Rectangle(Polygon):
 
 
 class Square(Rectangle):
-    '''
-    Creates a square at the center of the screen.
-    Parameters
-    -----
-    side_length : float
-        Edge length of the square
-    Examples :
-            square = Square(side_length=5, color=PINK)
-    Returns
-    -----
-    out : Square object
-        A Square object satisfying the specified parameters
-    '''
+    """
+    A square geometric shape.
+    
+    Creates a square (rectangle with equal width and height) positioned at
+    the center of the coordinate system.
+    
+    Args:
+        side_length: Length of each side of the square (default: 2.0).
+        **kwargs: Additional parameters passed to Rectangle (color, stroke_width, etc.).
+    
+    Example:
+        >>> square = Square(side_length=3, color=PINK)
+        >>> self.add(square)
+    
+    Returns:
+        Square: A square with the specified side length.
+    """
 
     def __init__(self, side_length: float = 2.0, **kwargs):
         super().__init__(side_length, side_length, **kwargs)
 
 
 class RoundedRectangle(Rectangle):
-    '''
-    Creates a rectangle with round edges at the center of the screen.
-    Parameters
-    -----
-    width : float
-        Width of the rounded rectangle
-    height : float
-        Height of the rounded rectangle
-    corner_radius : float
-        Corner radius of the rectangle
-    Examples :
-            rRectangle = RoundedRectangle(width=3, height=4, corner_radius=1, color=BLUE)
-    Returns
-    -----
-    out : RoundedRectangle object
+    """
+    A rectangle with rounded corners.
+    
+    Creates a rectangle with curved corners, useful for creating buttons,
+    panels, or other UI elements with softer edges.
+    
+    Args:
+        width: Width of the rounded rectangle (default: 4.0).
+        height: Height of the rounded rectangle (default: 2.0).
+        corner_radius: Radius of the rounded corners (default: 0.5).
+        **kwargs: Additional parameters passed to Rectangle.
+    
+    Example:
+        >>> rounded_rect = RoundedRectangle(
+        ...     width=3, height=2, corner_radius=0.3, color=BLUE
+        ... )
+        >>> self.add(rounded_rect)
+    
+    Returns:
+        RoundedRectangle: A rectangle with rounded corners.
+    """
         A RoundedRectangle object satisfying the specified parameters
     '''
 

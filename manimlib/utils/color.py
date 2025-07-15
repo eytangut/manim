@@ -20,6 +20,18 @@ if TYPE_CHECKING:
 
 
 def color_to_rgb(color: ManimColor) -> Vect3:
+    """
+    Convert a color to RGB format.
+    
+    Args:
+        color: Color in various formats (hex string, Color object).
+    
+    Returns:
+        RGB values as a numpy array [r, g, b] with values in [0, 1].
+    
+    Raises:
+        Exception: If the color type is not supported.
+    """
     if isinstance(color, str):
         return hex_to_rgb(color)
     elif isinstance(color, Color):
@@ -29,10 +41,29 @@ def color_to_rgb(color: ManimColor) -> Vect3:
 
 
 def color_to_rgba(color: ManimColor, alpha: float = 1.0) -> Vect4:
+    """
+    Convert a color to RGBA format.
+    
+    Args:
+        color: Color in various formats.
+        alpha: Alpha (opacity) value in [0, 1] (default: 1.0).
+    
+    Returns:
+        RGBA values as a numpy array [r, g, b, a] with values in [0, 1].
+    """
     return np.array([*color_to_rgb(color), alpha])
 
 
 def rgb_to_color(rgb: Vect3 | Sequence[float]) -> Color:
+    """
+    Convert RGB values to a Color object.
+    
+    Args:
+        rgb: RGB values as a sequence or array.
+    
+    Returns:
+        Color object. Returns WHITE if conversion fails.
+    """
     try:
         return Color(rgb=tuple(rgb))
     except ValueError:
@@ -40,18 +71,54 @@ def rgb_to_color(rgb: Vect3 | Sequence[float]) -> Color:
 
 
 def rgba_to_color(rgba: Vect4) -> Color:
+    """
+    Convert RGBA values to a Color object (ignoring alpha).
+    
+    Args:
+        rgba: RGBA values as a sequence or array.
+    
+    Returns:
+        Color object based on RGB components.
+    """
     return rgb_to_color(rgba[:3])
 
 
 def rgb_to_hex(rgb: Vect3 | Sequence[float]) -> str:
+    """
+    Convert RGB values to hexadecimal color string.
+    
+    Args:
+        rgb: RGB values in [0, 1].
+    
+    Returns:
+        Hexadecimal color string (e.g., "#FF0000").
+    """
     return rgb2hex(rgb, force_long=True).upper()
 
 
 def hex_to_rgb(hex_code: str) -> Vect3:
+    """
+    Convert hexadecimal color string to RGB values.
+    
+    Args:
+        hex_code: Hexadecimal color string (e.g., "#FF0000").
+    
+    Returns:
+        RGB values as numpy array with values in [0, 1].
+    """
     return np.array(hex2rgb(hex_code))
 
 
 def invert_color(color: ManimColor) -> Color:
+    """
+    Get the inverse/complement of a color.
+    
+    Args:
+        color: Input color.
+    
+    Returns:
+        Inverted color.
+    """
     return rgb_to_color(1.0 - color_to_rgb(color))
 
 

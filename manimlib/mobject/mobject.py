@@ -63,7 +63,33 @@ if TYPE_CHECKING:
 
 class Mobject(object):
     """
-    Mathematical Object
+    Mathematical Object - the fundamental building block of Manim scenes.
+    
+    A Mobject represents any object that can be displayed, animated, and manipulated
+    in a Manim scene. This includes geometric shapes, text, images, and complex
+    mathematical constructs.
+    
+    Args:
+        color (ManimColor): The color of the mobject.
+        opacity (float): The opacity/transparency (0.0 = transparent, 1.0 = opaque).
+        shading (Tuple[float, float, float]): Shading parameters for 3D rendering.
+        texture_paths (dict[str, str] | None): Paths to texture files for rendering.
+        is_fixed_in_frame (bool): If True, mobject doesn't rotate with camera.
+        depth_test (bool): Whether to perform depth testing for 3D rendering.
+        z_index (int): Layer index for rendering order (higher = in front).
+    
+    Attributes:
+        dim (int): Dimensionality of the mobject (typically 3).
+        shader_folder (str): Path to shader files for rendering.
+        render_primitive (int): OpenGL primitive type for rendering.
+        data_dtype (np.dtype): Data type for vertex data.
+        submobjects (list[Mobject]): Child mobjects contained within this one.
+        parents (list[Mobject]): Parent mobjects that contain this one.
+    
+    Example:
+        >>> mob = Mobject(color=RED, opacity=0.8)
+        >>> mob.shift(UP)  # Move the mobject up
+        >>> mob.rotate(PI/4)  # Rotate by 45 degrees
     """
     dim: int = 3
     shader_folder: str = ""
@@ -124,21 +150,47 @@ class Mobject(object):
             self.fix_in_frame()
 
     def __str__(self):
+        """Return string representation of the mobject."""
         return self.__class__.__name__
 
     def __add__(self, other: Mobject) -> Mobject:
+        """
+        Combine this mobject with another into a group.
+        
+        Args:
+            other: Another mobject to combine with.
+            
+        Returns:
+            Mobject: A group containing both mobjects.
+        """
         assert isinstance(other, Mobject)
         return self.get_group_class()(self, other)
 
     def __mul__(self, other: int) -> Mobject:
+        """
+        Create multiple copies of this mobject.
+        
+        Args:
+            other: Number of copies to create.
+            
+        Returns:
+            Mobject: A group containing the specified number of copies.
+        """
         assert isinstance(other, int)
         return self.replicate(other)
 
     def init_data(self, length: int = 0):
+        """
+        Initialize the vertex data array for this mobject.
+        
+        Args:
+            length: Number of data points to allocate.
+        """
         self.data = np.zeros(length, dtype=self.data_dtype)
         self._data_defaults = np.ones(1, dtype=self.data.dtype)
 
     def init_uniforms(self):
+        """Initialize the uniform variables for shader rendering."""
         self.uniforms: UniformDict = {
             "is_fixed_in_frame": 0.0,
             "shading": np.array(self.shading, dtype=float),
@@ -146,13 +198,29 @@ class Mobject(object):
         }
 
     def init_colors(self):
+        """Initialize the color and opacity of the mobject."""
         self.set_color(self.color, self.opacity)
 
     def init_points(self):
+        """
+        Initialize the points/vertices of the mobject.
+        
+        This method is typically implemented in subclasses to define
+        the geometry of specific shapes and objects.
+        """
         # Typically implemented in subclass, unlpess purposefully left blank
         pass
 
     def set_uniforms(self, uniforms: dict) -> Self:
+        """
+        Set shader uniform variables for this mobject.
+        
+        Args:
+            uniforms: Dictionary of uniform variable names and values.
+            
+        Returns:
+            Self: The mobject for method chaining.
+        """
         for key, value in uniforms.items():
             if isinstance(value, np.ndarray):
                 value = value.copy()
@@ -203,6 +271,15 @@ class Mobject(object):
         return _FunctionalUpdaterBuilder(self)
 
     def note_changed_data(self, recurse_up: bool = True) -> Self:
+        """
+        Mark that this mobject's data has changed and needs re-rendering.
+        
+        Args:
+            recurse_up: Whether to notify parent mobjects of the change.
+            
+        Returns:
+            Self: The mobject for method chaining.
+        """
         self._data_has_changed = True
         if recurse_up:
             for mob in self.parents:
@@ -211,6 +288,18 @@ class Mobject(object):
 
     @staticmethod
     def affects_data(func: Callable[..., T]) -> Callable[..., T]:
+        """
+        Decorator that marks data as changed after calling the function.
+        
+        This decorator should be applied to any method that modifies the
+        mobject's vertex data or rendering properties.
+        
+        Args:
+            func: The function to wrap.
+            
+        Returns:
+            Callable: The wrapped function that marks data as changed.
+        """
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             result = func(self, *args, **kwargs)
@@ -220,6 +309,18 @@ class Mobject(object):
 
     @staticmethod
     def affects_family_data(func: Callable[..., T]) -> Callable[..., T]:
+        """
+        Decorator that marks all family members' data as changed.
+        
+        This decorator should be applied to methods that modify data
+        for the entire family of mobjects (including submobjects).
+        
+        Args:
+            func: The function to wrap.
+            
+        Returns:
+            Callable: The wrapped function that marks family data as changed.
+        """
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             result = func(self, *args, **kwargs)

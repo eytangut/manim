@@ -1,3 +1,9 @@
+"""
+Creation and reveal animations for mobjects.
+
+This module contains animations that control how mobjects appear or disappear
+in scenes, including progressive drawing, fading, and partial revelation effects.
+"""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -24,7 +30,15 @@ if TYPE_CHECKING:
 
 class ShowPartial(Animation, ABC):
     """
-    Abstract class for ShowCreation and ShowPassingFlash
+    Abstract base class for animations that show partial mobjects.
+    
+    This class provides the foundation for animations like ShowCreation and 
+    ShowPassingFlash that reveal portions of mobjects progressively.
+    
+    Args:
+        mobject: The mobject to partially show.
+        should_match_start: Whether to match the starting state of the mobject.
+        **kwargs: Additional animation parameters.
     """
     def __init__(self, mobject: Mobject, should_match_start: bool = False, **kwargs):
         self.should_match_start = should_match_start
@@ -36,24 +50,81 @@ class ShowPartial(Animation, ABC):
         start_submob: VMobject,
         alpha: float
     ) -> None:
+        """
+        Interpolate a submobject to show partial state.
+        
+        Args:
+            submob: The submobject being animated.
+            start_submob: The starting state of the submobject.
+            alpha: Animation progress from 0 to 1.
+        """
         submob.pointwise_become_partial(
             start_submob, *self.get_bounds(alpha)
         )
 
     @abstractmethod
     def get_bounds(self, alpha: float) -> tuple[float, float]:
+        """
+        Get the bounds for partial display based on animation progress.
+        
+        Args:
+            alpha: Animation progress from 0 to 1.
+            
+        Returns:
+            tuple[float, float]: Start and end bounds for partial display.
+            
+        Raises:
+            Exception: Must be implemented by subclasses.
+        """
         raise Exception("Not Implemented")
 
 
 class ShowCreation(ShowPartial):
+    """
+    Animation that shows the creation/drawing of a mobject progressively.
+    
+    This animation reveals the mobject gradually, as if it's being drawn or created
+    in real-time. It's particularly effective for paths, shapes, and line-based objects.
+    
+    Args:
+        mobject (Mobject): The mobject to animate the creation of.
+        lag_ratio (float): Controls timing between submobjects (default 1.0 for sequential).
+        **kwargs: Additional animation parameters passed to parent class.
+    
+    Example:
+        >>> circle = Circle()
+        >>> self.play(ShowCreation(circle))
+    """
     def __init__(self, mobject: Mobject, lag_ratio: float = 1.0, **kwargs):
         super().__init__(mobject, lag_ratio=lag_ratio, **kwargs)
 
     def get_bounds(self, alpha: float) -> tuple[float, float]:
+        """
+        Get bounds for progressive creation from start to current progress.
+        
+        Args:
+            alpha: Animation progress from 0 to 1.
+            
+        Returns:
+            tuple[float, float]: Always (0, alpha) for creation from beginning.
+        """
         return (0, alpha)
 
 
 class Uncreate(ShowCreation):
+    """
+    Animation that removes a mobject by reversing its creation.
+    
+    This animation progressively hides a mobject, as if erasing or uncreating it.
+    By default, it removes the mobject from the scene when complete.
+    
+    Args:
+        mobject: The mobject to uncreate.
+        rate_func: Rate function (default: reversed smooth function).
+        remover: Whether to remove the mobject from scene (default: True).
+        should_match_start: Whether to match starting state (default: True).
+        **kwargs: Additional animation parameters.
+    """
     def __init__(
         self,
         mobject: Mobject,
@@ -142,6 +213,28 @@ class DrawBorderThenFill(Animation):
 
 
 class Write(DrawBorderThenFill):
+    """
+    Animation that writes text or shapes as if being drawn by hand.
+    
+    This animation is specifically designed for text and mathematical expressions,
+    writing them progressively character by character or stroke by stroke.
+    The timing adapts based on the complexity of the content.
+    
+    Args:
+        vmobject: The text or VMobject to write.
+        run_time: Duration of animation (auto-calculated if negative).
+        lag_ratio: Timing between submobjects (auto-calculated if negative).
+        rate_func: Rate function controlling timing (default: linear).
+        stroke_color: Color for writing stroke (default: object's color).
+        **kwargs: Additional animation parameters.
+    
+    Example:
+        >>> text = Text("Hello World")
+        >>> self.play(Write(text))
+        >>> # For mathematical expressions
+        >>> formula = MathTex("E = mc^2")
+        >>> self.play(Write(formula))
+    """
     def __init__(
         self,
         vmobject: VMobject,
@@ -164,11 +257,31 @@ class Write(DrawBorderThenFill):
         )
 
     def compute_run_time(self, family_size: int, run_time: float):
+        """
+        Automatically calculate run time based on content complexity.
+        
+        Args:
+            family_size: Number of submobjects to write.
+            run_time: Specified run time (if positive).
+        
+        Returns:
+            Appropriate run time for the content.
+        """
         if run_time < 0:
             return 1 if family_size < 15 else 2
         return run_time
 
     def compute_lag_ratio(self, family_size: int, lag_ratio: float):
+        """
+        Automatically calculate lag ratio for smooth writing.
+        
+        Args:
+            family_size: Number of submobjects to write.
+            lag_ratio: Specified lag ratio (if positive).
+        
+        Returns:
+            Appropriate lag ratio for smooth timing.
+        """
         if lag_ratio < 0:
             return min(4.0 / (family_size + 1.0), 0.2)
         return lag_ratio

@@ -29,6 +29,27 @@ if TYPE_CHECKING:
 
 
 class SurfaceMesh(VGroup):
+    """
+    A wireframe mesh representation of a 3D surface.
+    
+    Creates a grid of curves that follow the parametric lines of a surface,
+    providing a wireframe visualization useful for understanding surface geometry.
+    
+    Args:
+        uv_surface: The surface to create a mesh for.
+        resolution: Number of mesh lines in (u, v) directions (default: (21, 11)).
+        stroke_width: Width of mesh lines (default: 1).
+        stroke_color: Color of mesh lines (default: GREY_A).
+        normal_nudge: Distance to offset mesh along surface normals (default: 1e-2).
+        depth_test: Whether to enable depth testing for 3D rendering (default: True).
+        joint_type: Type of line joints (default: 'no_joint').
+        **kwargs: Additional VGroup parameters.
+    
+    Example:
+        >>> surface = ParametricSurface(lambda u, v: [u, v, u*v])
+        >>> mesh = SurfaceMesh(surface, resolution=(15, 10))
+        >>> self.add(surface, mesh)
+    """
     def __init__(
         self,
         uv_surface: Surface,
@@ -53,6 +74,12 @@ class SurfaceMesh(VGroup):
         )
 
     def init_points(self) -> None:
+        """
+        Initialize the mesh points by sampling the surface at regular intervals.
+        
+        Creates parametric curves along constant u and v lines of the surface,
+        with optional normal offset for better visibility.
+        """
         uv_surface = self.uv_surface
 
         full_nu, full_nv = uv_surface.resolution
@@ -91,6 +118,26 @@ class SurfaceMesh(VGroup):
 # 3D shapes
 
 class Sphere(Surface):
+    """
+    A 3D sphere surface.
+    
+    Creates a spherical surface using spherical coordinates (θ, φ) where
+    θ ranges from 0 to 2π (azimuthal angle) and φ ranges from 0 to π (polar angle).
+    
+    Args:
+        u_range: Range for azimuthal angle θ (default: (0, TAU)).
+        v_range: Range for polar angle φ (default: (0, PI)).
+        resolution: Number of sample points in (u, v) directions (default: (101, 51)).
+        radius: Radius of the sphere (default: 1.0).
+        true_normals: Whether to use analytical normals for better lighting (default: True).
+        **kwargs: Additional Surface parameters.
+    
+    Example:
+        >>> sphere = Sphere(radius=2, color=BLUE)
+        >>> self.add(sphere)
+        >>> # Hemisphere
+        >>> hemisphere = Sphere(v_range=(0, PI/2), color=RED)
+    """
     def __init__(
         self,
         u_range: Tuple[float, float] = (0, TAU),

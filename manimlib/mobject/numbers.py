@@ -23,6 +23,19 @@ if TYPE_CHECKING:
 
 @lru_cache()
 def char_to_cahced_mob(char: str, **text_config):
+    """
+    Convert a character to a cached mobject for efficient text rendering.
+    
+    This function creates either a Tex or Text mobject depending on whether
+    the character contains LaTeX commands, and caches the result for reuse.
+    
+    Args:
+        char: Character or LaTeX command string.
+        **text_config: Configuration for text rendering.
+    
+    Returns:
+        Mobject: Either a Tex or Text mobject representing the character.
+    """
     if "\\" in char:
         # This is for when the "character" is a LaTeX command
         # like ^\circ or \dots
@@ -32,6 +45,38 @@ def char_to_cahced_mob(char: str, **text_config):
 
 
 class DecimalNumber(VMobject):
+    """
+    A mobject for displaying formatted numbers with customizable precision and styling.
+    
+    This class creates visual representations of numbers with control over decimal places,
+    sign display, comma grouping, units, and other formatting options. Numbers can be
+    animated to change values smoothly.
+    
+    Args:
+        number: The number to display (float or complex).
+        color: Color of the number text.
+        stroke_width: Width of text stroke (default: 0).
+        fill_opacity: Opacity of text fill (default: 1.0).
+        fill_border_width: Width of fill border (default: 0.5).
+        num_decimal_places: Number of decimal places to show (default: 2).
+        min_total_width: Minimum total width in characters (default: 0).
+        include_sign: Whether to show + sign for positive numbers (default: False).
+        group_with_commas: Whether to use comma separators (default: True).
+        digit_buff_per_font_unit: Spacing between digits (default: 0.001).
+        show_ellipsis: Whether to show ... for truncated numbers (default: False).
+        unit: Unit string to display after the number (default: None).
+        include_background_rectangle: Whether to add background (default: False).
+        edge_to_fix: Which edge to fix during value changes (default: LEFT).
+        font_size: Size of the font (default: 48).
+        text_config: Additional text configuration options.
+        **kwargs: Additional VMobject parameters.
+    
+    Example:
+        >>> number = DecimalNumber(3.14159, num_decimal_places=3)
+        >>> self.add(number)
+        >>> # Animated number change
+        >>> self.play(ChangeDecimalToValue(number, 2.71828))
+    """
     def __init__(
         self,
         number: float | complex = 0,
@@ -76,6 +121,15 @@ class DecimalNumber(VMobject):
         self.init_colors()
 
     def set_submobjects_from_number(self, number: float | complex) -> None:
+        """
+        Update the submobjects to display the given number.
+        
+        This method converts the number to a formatted string and creates
+        submobjects for each character/component.
+        
+        Args:
+            number: The number to display.
+        """
         # Create the submobject list
         self.number = number
         self.num_string = self.get_num_string(number)

@@ -20,12 +20,29 @@ if TYPE_CHECKING:
 
 
 class BlankScene(InteractiveScene):
+    """
+    A blank interactive scene for experimentation and debugging.
+    
+    This scene provides a clean environment for testing code interactively
+    without any predefined content. It executes the universal import line
+    and immediately enters embed mode.
+    """
     def construct(self):
         exec(manim_config.universal_import_line)
         self.embed()
 
 
 def is_child_scene(obj, module):
+    """
+    Check if an object is a valid Scene class defined in the given module.
+    
+    Args:
+        obj: Object to check.
+        module: Module to verify the object belongs to.
+    
+    Returns:
+        bool: True if obj is a Scene subclass from the specified module.
+    """
     if not inspect.isclass(obj):
         return False
     if not issubclass(obj, Scene):
@@ -38,6 +55,18 @@ def is_child_scene(obj, module):
 
 
 def prompt_user_for_choice(scene_classes):
+    """
+    Prompt the user to select which scene(s) to render from available options.
+    
+    Args:
+        scene_classes: List of available Scene classes.
+    
+    Returns:
+        list: Selected Scene classes to render.
+    
+    Raises:
+        SystemExit: If invalid scene name or number provided.
+    """
     name_to_class = {}
     max_digits = len(str(len(scene_classes)))
     for idx, scene_class in enumerate(scene_classes, start=1):
@@ -79,6 +108,17 @@ def compute_total_frames(scene_class, scene_config):
 
 
 def scene_from_class(scene_class, scene_config: Dict, run_config: Dict):
+    """
+    Create a scene instance from a scene class with given configuration.
+    
+    Args:
+        scene_class: The Scene class to instantiate.
+        scene_config: Configuration for the scene.
+        run_config: Configuration for the run.
+    
+    Returns:
+        Scene: Instantiated scene ready for execution.
+    """
     fw_config = manim_config.file_writer
     if fw_config.write_to_movie and run_config.prerun:
         scene_config.file_writer_config.total_frames = compute_total_frames(scene_class, scene_config)
@@ -86,12 +126,30 @@ def scene_from_class(scene_class, scene_config: Dict, run_config: Dict):
 
 
 def note_missing_scenes(arg_names, module_names):
+    """
+    Log errors for scene names that weren't found in the module.
+    
+    Args:
+        arg_names: List of scene names requested by user.
+        module_names: List of scene names found in the module.
+    """
     for name in arg_names:
         if name not in module_names:
             log.error(f"No scene named {name} found")
 
 
 def get_scenes_to_render(all_scene_classes: list, scene_config: Dict, run_config: Dict):
+    """
+    Determine which scene classes should be rendered based on configuration.
+    
+    Args:
+        all_scene_classes: All available Scene classes.
+        scene_config: Configuration for scenes.
+        run_config: Configuration for the run.
+    
+    Returns:
+        list: Scene classes that should be rendered.
+    """
     if run_config["write_all"] or len(all_scene_classes) == 1:
         classes_to_run = all_scene_classes
     else:

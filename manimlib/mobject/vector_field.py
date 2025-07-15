@@ -1,3 +1,16 @@
+"""
+Vector field visualization and manipulation for mathematical animations.
+
+This module provides tools for visualizing vector fields, including arrow
+representations, streamlines, and flow animations. It's particularly useful
+for demonstrating concepts in physics, engineering, and mathematics such as
+fluid dynamics, electromagnetic fields, and differential equations.
+
+The module includes classes for creating vector fields from functions,
+visualizing them with arrows or streamlines, and animating particle flow
+through the fields.
+"""
+
 from __future__ import annotations
 
 import itertools as it

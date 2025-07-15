@@ -23,6 +23,31 @@ if TYPE_CHECKING:
 
 
 class Camera(object):
+    """
+    Handles rendering and viewport management for Manim scenes.
+    
+    The Camera is responsible for capturing the scene from a particular viewpoint,
+    managing rendering settings, and producing the final output frames.
+    
+    Args:
+        window (Optional[Window]): The window to render into.
+        background_image (Optional[str]): Path to background image file.
+        frame_config (dict): Configuration for the camera frame.
+        resolution (tuple): Output resolution as (width, height).
+        fps (int): Frames per second for animation timing.
+        background_color (ManimColor): Color of the background.
+        background_opacity (float): Opacity of the background (0.0-1.0).
+        max_allowable_norm (float): Maximum vector magnitude before rescaling.
+        image_mode (str): Image mode for output ("RGBA", "RGB", etc.).
+        n_channels (int): Number of color channels.
+        pixel_array_dtype (type): Data type for pixel arrays.
+        light_source_position (Vect3): Position of the light source for 3D rendering.
+        samples (int): Number of samples for multisampling antialiasing.
+    
+    Example:
+        >>> camera = Camera(resolution=(1920, 1080), fps=30)
+        >>> camera.set_background_color(WHITE)
+    """
     def __init__(
         self,
         window: Optional[Window] = None,
@@ -67,9 +92,21 @@ class Camera(object):
         self.init_light_source()
 
     def init_frame(self, **config) -> None:
+        """
+        Initialize the camera frame with given configuration.
+        
+        Args:
+            **config: Configuration parameters for the CameraFrame.
+        """
         self.frame = CameraFrame(**config)
 
     def init_context(self) -> None:
+        """
+        Initialize the OpenGL context for rendering.
+        
+        Creates either a standalone context or uses the window's context
+        depending on whether a window is available.
+        """
         if self.window is None:
             self.ctx: moderngl.Context = moderngl.create_standalone_context()
         else:
@@ -79,6 +116,14 @@ class Camera(object):
         self.ctx.enable(moderngl.BLEND)
 
     def init_fbo(self) -> None:
+        """
+        Initialize framebuffers for rendering.
+        
+        Creates multiple framebuffers:
+        - fbo_for_files: High-quality buffer for video/image output
+        - draw_fbo: Standard buffer for drawing operations
+        - window_fbo: Buffer for window display (if window exists)
+        """
         # This is the buffer used when writing to a video/image file
         self.fbo_for_files = self.get_fbo(self.samples)
 
@@ -95,9 +140,21 @@ class Camera(object):
         self.fbo.use()
 
     def init_light_source(self) -> None:
+        """
+        Initialize the light source for 3D rendering.
+        
+        Creates a Point object representing the light source position
+        for proper 3D shading and illumination calculations.
+        """
         self.light_source = Point(self.light_source_position)
 
     def use_window_fbo(self, use: bool = True):
+        """
+        Switch between window and file framebuffers.
+        
+        Args:
+            use: If True, use window framebuffer; if False, use file framebuffer.
+        """
         assert self.window is not None
         if use:
             self.fbo = self.window_fbo
@@ -109,6 +166,15 @@ class Camera(object):
         self,
         samples: int = 0
     ) -> moderngl.Framebuffer:
+        """
+        Create a framebuffer with specified multisampling.
+        
+        Args:
+            samples: Number of samples for multisampling antialiasing.
+        
+        Returns:
+            moderngl.Framebuffer: A framebuffer object for rendering.
+        """
         return self.ctx.framebuffer(
             color_attachments=self.ctx.texture(
                 self.default_pixel_shape,

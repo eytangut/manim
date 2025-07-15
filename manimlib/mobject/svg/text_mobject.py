@@ -59,6 +59,25 @@ def markup_to_svg(
     alignment: str = "CENTER",
     line_width: float | None = None,
 ) -> str:
+    """
+    Convert markup text to SVG format using Pango text layout.
+    
+    This function takes a markup string and converts it to SVG format,
+    with options for text alignment, justification, and line wrapping.
+    
+    Args:
+        markup_str: Pango markup string with styling information.
+        justify: Whether to justify text alignment.
+        indent: Indentation amount for text.
+        alignment: Text alignment ("LEFT", "CENTER", "RIGHT").
+        line_width: Maximum line width for text wrapping.
+    
+    Returns:
+        SVG string representation of the formatted text.
+    
+    Raises:
+        ValueError: If the markup string is invalid.
+    """
     validate_error = manimpango.MarkupUtils.validate(markup_str)
     if validate_error:
         raise ValueError(
@@ -386,6 +405,26 @@ class MarkupText(StringMobject):
 
 
 class Text(MarkupText):
+    """
+    A simple text mobject for displaying plain text.
+    
+    This class creates text objects that can be styled, animated, and positioned
+    in Manim scenes. It automatically handles markup escaping for plain text.
+    
+    Args:
+        text: The text string to display.
+        isolate: Selector for isolating text components (for advanced styling).
+        use_labelled_svg: Whether to use labelled SVG for better text handling.
+        path_string_config: Configuration for path string conversion.
+        **kwargs: Additional parameters for text styling (font, color, size, etc.).
+    
+    Example:
+        >>> text = Text("Hello World!", font="Arial", color=BLUE)
+        >>> self.add(text)
+        >>> # Animated text
+        >>> title = Text("My Animation", font_size=48)
+        >>> self.play(Write(title))
+    """
     def __init__(
         self,
         text: str,
@@ -407,19 +446,55 @@ class Text(MarkupText):
 
     @staticmethod
     def get_command_matches(string: str) -> list[re.Match]:
+        """
+        Find special characters that need markup escaping.
+        
+        Args:
+            string: Input text string.
+            
+        Returns:
+            List of regex matches for special characters.
+        """
         pattern = re.compile(r"""[<>&"']""")
         return list(pattern.finditer(string))
 
     @staticmethod
     def get_command_flag(match_obj: re.Match) -> int:
+        """
+        Get command flag for matched characters (always 0 for plain text).
+        
+        Args:
+            match_obj: Regex match object.
+            
+        Returns:
+            Always returns 0 for plain text.
+        """
         return 0
 
     @staticmethod
     def replace_for_content(match_obj: re.Match) -> str:
+        """
+        Replace special characters with escaped markup equivalents.
+        
+        Args:
+            match_obj: Regex match object for special character.
+            
+        Returns:
+            Escaped markup string.
+        """
         return Text.escape_markup_char(match_obj.group())
 
     @staticmethod
     def replace_for_matching(match_obj: re.Match) -> str:
+        """
+        Replace for matching purposes (returns original character).
+        
+        Args:
+            match_obj: Regex match object.
+            
+        Returns:
+            Original matched character.
+        """
         return match_obj.group()
 
 

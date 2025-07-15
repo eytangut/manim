@@ -1,3 +1,13 @@
+"""
+Spatial operations and geometric utilities for 3D mathematics.
+
+This module provides functions for 3D vector operations, rotations, coordinate
+transformations, and other spatial calculations commonly needed in 3D graphics
+and animations.
+
+Functions include vector cross products, normalizations, rotations, projections,
+and coordinate system conversions.
+"""
 from __future__ import annotations
 
 from functools import reduce
@@ -27,6 +37,21 @@ def cross(
     v2: Vect3 | List[float],
     out: np.ndarray | None = None
 ) -> Vect3 | Vect3Array:
+    """
+    Compute the cross product of two 3D vectors.
+    
+    Args:
+        v1: First vector (3D).
+        v2: Second vector (3D).
+        out: Optional output array to store result.
+    
+    Returns:
+        The cross product vector v1 × v2.
+    
+    Example:
+        >>> cross([1, 0, 0], [0, 1, 0])
+        array([0., 0., 1.])
+    """
     is2d = isinstance(v1, np.ndarray) and len(v1.shape) == 2
     if is2d:
         x1, y1, z1 = v1[:, 0], v1[:, 1], v1[:, 2]
@@ -45,10 +70,37 @@ def cross(
 
 
 def get_norm(vect: VectN | List[float]) -> float:
+    """
+    Calculate the Euclidean norm (magnitude) of a vector.
+    
+    Args:
+        vect: Input vector of any dimension.
+    
+    Returns:
+        The magnitude/length of the vector.
+    
+    Example:
+        >>> get_norm([3, 4])
+        5.0
+    """
     return sum((x**2 for x in vect))**0.5
 
 
 def get_dist(vect1: VectN, vect2: VectN):
+    """
+    Calculate the distance between two vectors.
+    
+    Args:
+        vect1: First vector.
+        vect2: Second vector.
+    
+    Returns:
+        The Euclidean distance between the two vectors.
+    
+    Example:
+        >>> get_dist([0, 0], [3, 4])
+        5.0
+    """
     return get_norm(vect2 - vect1)
 
 
@@ -56,6 +108,20 @@ def normalize(
     vect: VectN | List[float],
     fall_back: VectN | List[float] | None = None
 ) -> VectN:
+    """
+    Normalize a vector to unit length.
+    
+    Args:
+        vect: Input vector to normalize.
+        fall_back: Vector to return if input has zero length.
+    
+    Returns:
+        The normalized vector with magnitude 1, or fall_back if zero vector.
+    
+    Example:
+        >>> normalize([3, 4])
+        array([0.6, 0.8])
+    """
     norm = get_norm(vect)
     if norm > 0:
         return np.array(vect) / norm
@@ -67,7 +133,18 @@ def normalize(
 
 def poly_line_length(points):
     """
-    Return the sum of the lengths between adjacent points
+    Calculate the total length of a polyline (connected line segments).
+    
+    Args:
+        points: Array of points defining the polyline vertices.
+    
+    Returns:
+        The sum of the lengths between adjacent points.
+    
+    Example:
+        >>> points = np.array([[0, 0], [1, 0], [1, 1]])
+        >>> poly_line_length(points)
+        2.0
     """
     diffs = points[1:] - points[:-1]
     return np.sqrt((diffs**2).sum(1)).sum()
@@ -77,8 +154,22 @@ def poly_line_length(points):
 
 def quaternion_mult(*quats: Vect4) -> Vect4:
     """
+    Multiply multiple quaternions together.
+    
     Inputs are treated as quaternions, where the real part is the
-    last entry, so as to follow the scipy Rotation conventions.
+    last entry, following scipy Rotation conventions.
+    
+    Args:
+        *quats: Variable number of quaternion arrays [x, y, z, w].
+    
+    Returns:
+        The product of all input quaternions.
+    
+    Example:
+        >>> q1 = [0, 0, 0, 1]  # Identity quaternion
+        >>> q2 = [0, 0, 0.707, 0.707]  # 90-degree rotation about z
+        >>> quaternion_mult(q1, q2)
+        array([0, 0, 0.707, 0.707])
     """
     if len(quats) == 0:
         return np.array([0, 0, 0, 1])
@@ -99,16 +190,61 @@ def quaternion_from_angle_axis(
     angle: float,
     axis: Vect3,
 ) -> Vect4:
+    """
+    Create a quaternion from an angle and rotation axis.
+    
+    Args:
+        angle: Rotation angle in radians.
+        axis: 3D vector representing the rotation axis.
+    
+    Returns:
+        Quaternion [x, y, z, w] representing the rotation.
+    
+    Example:
+        >>> quat = quaternion_from_angle_axis(PI/2, [0, 0, 1])  # 90° about z
+        >>> quat
+        array([0, 0, 0.707, 0.707])
+    """
     return Rotation.from_rotvec(angle * normalize(axis)).as_quat()
 
 
 def angle_axis_from_quaternion(quat: Vect4) -> Tuple[float, Vect3]:
+    """
+    Extract angle and axis from a quaternion.
+    
+    Args:
+        quat: Quaternion [x, y, z, w].
+    
+    Returns:
+        Tuple of (angle, axis) representing the rotation.
+    
+    Example:
+        >>> angle, axis = angle_axis_from_quaternion([0, 0, 0.707, 0.707])
+        >>> angle  # approximately PI/2
+        >>> axis   # approximately [0, 0, 1]
+    """
     rot_vec = Rotation.from_quat(quat).as_rotvec()
     norm = get_norm(rot_vec)
     return norm, rot_vec / norm
 
 
 def quaternion_conjugate(quaternion: Vect4) -> Vect4:
+    """
+    Compute the conjugate of a quaternion.
+    
+    The conjugate of quaternion [x, y, z, w] is [-x, -y, -z, w].
+    
+    Args:
+        quaternion: Input quaternion [x, y, z, w].
+    
+    Returns:
+        The conjugated quaternion.
+    
+    Example:
+        >>> quat = [1, 2, 3, 4]
+        >>> quaternion_conjugate(quat)
+        array([-1, -2, -3,  4])
+    """
     result = np.array(quaternion)
     result[:3] *= -1
     return result
@@ -119,11 +255,42 @@ def rotate_vector(
     angle: float,
     axis: Vect3 = OUT
 ) -> Vect3:
+    """
+    Rotate a 3D vector around a given axis by a specified angle.
+    
+    Args:
+        vector: The 3D vector to rotate.
+        angle: Rotation angle in radians.
+        axis: Rotation axis (default: OUT for z-axis).
+    
+    Returns:
+        The rotated vector.
+    
+    Example:
+        >>> rotated = rotate_vector([1, 0, 0], PI/2, [0, 0, 1])
+        >>> rotated  # approximately [0, 1, 0]
+    """
     rot = Rotation.from_rotvec(angle * normalize(axis))
     return np.dot(vector, rot.as_matrix().T)
 
 
 def rotate_vector_2d(vector: Vect2, angle: float) -> Vect2:
+    """
+    Rotate a 2D vector by a given angle.
+    
+    Uses complex number multiplication for efficient 2D rotation.
+    
+    Args:
+        vector: The 2D vector to rotate.
+        angle: Rotation angle in radians.
+    
+    Returns:
+        The rotated 2D vector.
+    
+    Example:
+        >>> rotated = rotate_vector_2d([1, 0], PI/2)
+        >>> rotated  # approximately [0, 1]
+    """
     # Use complex numbers...because why not
     z = complex(*vector) * np.exp(complex(0, angle))
     return np.array([z.real, z.imag])

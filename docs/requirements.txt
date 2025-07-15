@@ -1,4 +1,5 @@
-Sphinx==3.0.3
-sphinx-copybutton
-furo==2020.10.5b9
-Jinja2
+# Manim Documentation Requirements
+
+sphinx>=4.0.0
+sphinx-rtd-theme>=1.0.0
+sphinx-autodoc-typehints>=1.12.0

@@ -1,3 +1,17 @@
+"""
+Rate functions for controlling animation timing and easing.
+
+This module provides various rate functions that can be used to control
+the timing and easing of animations. Rate functions take a value t ∈ [0,1]
+representing linear animation progress and return a modified value that
+creates different acceleration/deceleration effects.
+
+Common rate functions include:
+- linear: Constant speed
+- smooth: Ease in and out (S-curve)
+- rush_into/rush_from: Quick acceleration or deceleration
+- there_and_back: Move forward then backward
+"""
 from __future__ import annotations
 
 import numpy as np
@@ -11,10 +25,31 @@ if TYPE_CHECKING:
 
 
 def linear(t: float) -> float:
+    """
+    Linear rate function - no easing.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+    
+    Returns:
+        The input value unchanged.
+    """
     return t
 
 
 def smooth(t: float) -> float:
+    """
+    Smooth rate function with ease-in and ease-out.
+    
+    Creates an S-curve with zero first and second derivatives at t=0 and t=1,
+    providing gentle acceleration and deceleration.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+    
+    Returns:
+        Smoothed progress value.
+    """
     # Zero first and second derivatives at t=0 and t=1.
     # Equivalent to bezier([0, 0, 0, 1, 1, 1])
     s = 1 - t
@@ -22,18 +57,54 @@ def smooth(t: float) -> float:
 
 
 def rush_into(t: float) -> float:
+    """
+    Rate function with rapid acceleration at the start.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+    
+    Returns:
+        Progress value with fast initial acceleration.
+    """
     return 2 * smooth(0.5 * t)
 
 
 def rush_from(t: float) -> float:
+    """
+    Rate function with rapid acceleration at the end.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+    
+    Returns:
+        Progress value with fast final acceleration.
+    """
     return 2 * smooth(0.5 * (t + 1)) - 1
 
 
 def slow_into(t: float) -> float:
+    """
+    Rate function with gradual ease-in.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+    
+    Returns:
+        Progress value with slow initial acceleration.
+    """
     return np.sqrt(1 - (1 - t) * (1 - t))
 
 
 def double_smooth(t: float) -> float:
+    """
+    Rate function with two smooth phases.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+    
+    Returns:
+        Progress value with two smooth acceleration curves.
+    """
     if t < 0.5:
         return 0.5 * smooth(2 * t)
     else:
@@ -41,11 +112,35 @@ def double_smooth(t: float) -> float:
 
 
 def there_and_back(t: float) -> float:
+    """
+    Rate function that goes from 0 to 1 and back to 0.
+    
+    Creates a motion that accelerates forward and then returns,
+    useful for oscillating or bouncing effects.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+    
+    Returns:
+        Progress value that peaks at t=0.5 and returns to 0.
+    """
     new_t = 2 * t if t < 0.5 else 2 * (1 - t)
     return smooth(new_t)
 
 
 def there_and_back_with_pause(t: float, pause_ratio: float = 1. / 3) -> float:
+    """
+    Rate function that goes forward, pauses, then returns.
+    
+    Like there_and_back but with a pause at the peak position.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+        pause_ratio: Fraction of time to pause at the peak (default: 1/3).
+    
+    Returns:
+        Progress value with pause at the peak.
+    """
     a = 2. / (1. - pause_ratio)
     if t < 0.5 - pause_ratio / 2:
         return smooth(a * t)
@@ -56,10 +151,36 @@ def there_and_back_with_pause(t: float, pause_ratio: float = 1. / 3) -> float:
 
 
 def running_start(t: float, pull_factor: float = -0.5) -> float:
+    """
+    Rate function with a "running start" - moves backward before accelerating forward.
+    
+    Creates an effect like winding up before launching, where the animation
+    briefly moves in the opposite direction before proceeding.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+        pull_factor: How far to pull back (negative values pull backward).
+    
+    Returns:
+        Progress value with running start effect.
+    """
     return bezier([0, 0, pull_factor, pull_factor, 1, 1, 1])(t)
 
 
 def overshoot(t: float, pull_factor: float = 1.5) -> float:
+    """
+    Rate function that overshoots the target before settling.
+    
+    Creates a bouncing or springy effect by going past the target
+    before returning to the final position.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+        pull_factor: How much to overshoot (values > 1 overshoot).
+    
+    Returns:
+        Progress value with overshoot effect.
+    """
     return bezier([0, 0, pull_factor, pull_factor, 1, 1])(t)
 
 
@@ -67,12 +188,37 @@ def not_quite_there(
     func: Callable[[float], float] = smooth,
     proportion: float = 0.7
 ) -> Callable[[float], float]:
+    """
+    Create a rate function that doesn't quite reach the target.
+    
+    Multiplies another rate function by a proportion less than 1,
+    creating animations that approach but don't fully reach their target.
+    
+    Args:
+        func: The base rate function to modify.
+        proportion: Fraction of the target to reach (default: 0.7).
+    
+    Returns:
+        A new rate function that reaches only the specified proportion.
+    """
     def result(t):
         return proportion * func(t)
     return result
 
 
 def wiggle(t: float, wiggles: float = 2) -> float:
+    """
+    Rate function that creates a wiggling/oscillating effect.
+    
+    Combines there_and_back motion with sinusoidal oscillation.
+    
+    Args:
+        t: Animation progress from 0 to 1.
+        wiggles: Number of wiggle cycles (default: 2).
+    
+    Returns:
+        Progress value with wiggling effect.
+    """
     return there_and_back(t) * np.sin(wiggles * np.pi * t)
 
 
