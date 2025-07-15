@@ -732,3 +732,8 @@ class ControlsExample(Scene):
 
 
 # See https://github.com/3b1b/videos for many, many more
+
+# Graph Theory Educational Animation
+# To run: manimgl graph_theory_animation.py GraphTheoryEducation
+# This comprehensive animation covers fundamental graph theory concepts
+# including basic definitions, graph types, traversal algorithms, and special graphs.
