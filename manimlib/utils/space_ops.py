@@ -133,7 +133,18 @@ def normalize(
 
 def poly_line_length(points):
     """
-    Return the sum of the lengths between adjacent points
+    Calculate the total length of a polyline (connected line segments).
+    
+    Args:
+        points: Array of points defining the polyline vertices.
+    
+    Returns:
+        The sum of the lengths between adjacent points.
+    
+    Example:
+        >>> points = np.array([[0, 0], [1, 0], [1, 1]])
+        >>> poly_line_length(points)
+        2.0
     """
     diffs = points[1:] - points[:-1]
     return np.sqrt((diffs**2).sum(1)).sum()
@@ -143,8 +154,22 @@ def poly_line_length(points):
 
 def quaternion_mult(*quats: Vect4) -> Vect4:
     """
+    Multiply multiple quaternions together.
+    
     Inputs are treated as quaternions, where the real part is the
-    last entry, so as to follow the scipy Rotation conventions.
+    last entry, following scipy Rotation conventions.
+    
+    Args:
+        *quats: Variable number of quaternion arrays [x, y, z, w].
+    
+    Returns:
+        The product of all input quaternions.
+    
+    Example:
+        >>> q1 = [0, 0, 0, 1]  # Identity quaternion
+        >>> q2 = [0, 0, 0.707, 0.707]  # 90-degree rotation about z
+        >>> quaternion_mult(q1, q2)
+        array([0, 0, 0.707, 0.707])
     """
     if len(quats) == 0:
         return np.array([0, 0, 0, 1])
@@ -165,16 +190,61 @@ def quaternion_from_angle_axis(
     angle: float,
     axis: Vect3,
 ) -> Vect4:
+    """
+    Create a quaternion from an angle and rotation axis.
+    
+    Args:
+        angle: Rotation angle in radians.
+        axis: 3D vector representing the rotation axis.
+    
+    Returns:
+        Quaternion [x, y, z, w] representing the rotation.
+    
+    Example:
+        >>> quat = quaternion_from_angle_axis(PI/2, [0, 0, 1])  # 90° about z
+        >>> quat
+        array([0, 0, 0.707, 0.707])
+    """
     return Rotation.from_rotvec(angle * normalize(axis)).as_quat()
 
 
 def angle_axis_from_quaternion(quat: Vect4) -> Tuple[float, Vect3]:
+    """
+    Extract angle and axis from a quaternion.
+    
+    Args:
+        quat: Quaternion [x, y, z, w].
+    
+    Returns:
+        Tuple of (angle, axis) representing the rotation.
+    
+    Example:
+        >>> angle, axis = angle_axis_from_quaternion([0, 0, 0.707, 0.707])
+        >>> angle  # approximately PI/2
+        >>> axis   # approximately [0, 0, 1]
+    """
     rot_vec = Rotation.from_quat(quat).as_rotvec()
     norm = get_norm(rot_vec)
     return norm, rot_vec / norm
 
 
 def quaternion_conjugate(quaternion: Vect4) -> Vect4:
+    """
+    Compute the conjugate of a quaternion.
+    
+    The conjugate of quaternion [x, y, z, w] is [-x, -y, -z, w].
+    
+    Args:
+        quaternion: Input quaternion [x, y, z, w].
+    
+    Returns:
+        The conjugated quaternion.
+    
+    Example:
+        >>> quat = [1, 2, 3, 4]
+        >>> quaternion_conjugate(quat)
+        array([-1, -2, -3,  4])
+    """
     result = np.array(quaternion)
     result[:3] *= -1
     return result
@@ -185,11 +255,42 @@ def rotate_vector(
     angle: float,
     axis: Vect3 = OUT
 ) -> Vect3:
+    """
+    Rotate a 3D vector around a given axis by a specified angle.
+    
+    Args:
+        vector: The 3D vector to rotate.
+        angle: Rotation angle in radians.
+        axis: Rotation axis (default: OUT for z-axis).
+    
+    Returns:
+        The rotated vector.
+    
+    Example:
+        >>> rotated = rotate_vector([1, 0, 0], PI/2, [0, 0, 1])
+        >>> rotated  # approximately [0, 1, 0]
+    """
     rot = Rotation.from_rotvec(angle * normalize(axis))
     return np.dot(vector, rot.as_matrix().T)
 
 
 def rotate_vector_2d(vector: Vect2, angle: float) -> Vect2:
+    """
+    Rotate a 2D vector by a given angle.
+    
+    Uses complex number multiplication for efficient 2D rotation.
+    
+    Args:
+        vector: The 2D vector to rotate.
+        angle: Rotation angle in radians.
+    
+    Returns:
+        The rotated 2D vector.
+    
+    Example:
+        >>> rotated = rotate_vector_2d([1, 0], PI/2)
+        >>> rotated  # approximately [0, 1]
+    """
     # Use complex numbers...because why not
     z = complex(*vector) * np.exp(complex(0, angle))
     return np.array([z.real, z.imag])

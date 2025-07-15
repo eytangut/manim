@@ -116,6 +116,14 @@ class Camera(object):
         self.ctx.enable(moderngl.BLEND)
 
     def init_fbo(self) -> None:
+        """
+        Initialize framebuffers for rendering.
+        
+        Creates multiple framebuffers:
+        - fbo_for_files: High-quality buffer for video/image output
+        - draw_fbo: Standard buffer for drawing operations
+        - window_fbo: Buffer for window display (if window exists)
+        """
         # This is the buffer used when writing to a video/image file
         self.fbo_for_files = self.get_fbo(self.samples)
 
@@ -132,9 +140,21 @@ class Camera(object):
         self.fbo.use()
 
     def init_light_source(self) -> None:
+        """
+        Initialize the light source for 3D rendering.
+        
+        Creates a Point object representing the light source position
+        for proper 3D shading and illumination calculations.
+        """
         self.light_source = Point(self.light_source_position)
 
     def use_window_fbo(self, use: bool = True):
+        """
+        Switch between window and file framebuffers.
+        
+        Args:
+            use: If True, use window framebuffer; if False, use file framebuffer.
+        """
         assert self.window is not None
         if use:
             self.fbo = self.window_fbo
@@ -146,6 +166,15 @@ class Camera(object):
         self,
         samples: int = 0
     ) -> moderngl.Framebuffer:
+        """
+        Create a framebuffer with specified multisampling.
+        
+        Args:
+            samples: Number of samples for multisampling antialiasing.
+        
+        Returns:
+            moderngl.Framebuffer: A framebuffer object for rendering.
+        """
         return self.ctx.framebuffer(
             color_attachments=self.ctx.texture(
                 self.default_pixel_shape,

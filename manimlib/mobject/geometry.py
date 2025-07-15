@@ -453,20 +453,29 @@ class Circle(Arc):
 
 
 class Dot(Circle):
-    '''
-    Creates a dot. Dot is a filled white circle with no bounary and DEFAULT_DOT_RADIUS.
-    Parameters
-    -----
-    point : array_like
-        Coordinates of center of the dot.
-    Examples :
-            dot = Dot(point=(1, 2, 0))
-
-    Returns
-    -----
-    out : Dot object
-        A Dot object satisfying the specified parameters
-    '''
+    """
+    A filled circle representing a point or dot.
+    
+    Creates a small filled circle, typically used to mark points or positions
+    in mathematical visualizations. The dot has no stroke by default and is
+    filled with the default mobject color.
+    
+    Args:
+        point: Coordinates of the center of the dot (default: ORIGIN).
+        radius: Radius of the dot (default: DEFAULT_DOT_RADIUS).
+        stroke_color: Color of the outline (default: BLACK).
+        stroke_width: Width of the outline stroke (default: 0.0).
+        fill_opacity: Opacity of the fill (default: 1.0).
+        fill_color: Color of the fill (default: DEFAULT_MOBJECT_COLOR).
+        **kwargs: Additional parameters passed to Circle.
+    
+    Example:
+        >>> dot = Dot(point=2*UP + RIGHT, radius=0.1, fill_color=RED)
+        >>> self.add(dot)
+    
+    Returns:
+        Dot: A filled circle representing a point.
+    """
 
     def __init__(
         self,
@@ -490,20 +499,24 @@ class Dot(Circle):
 
 
 class SmallDot(Dot):
-    '''
-    Creates a small dot. Small dot is a filled white circle with no bounary and DEFAULT_SMALL_DOT_RADIUS.
-    Parameters
-    -----
-    point : array_like
-        Coordinates of center of the small dot.
-    Examples :
-            smallDot = SmallDot(point=(1, 2, 0))
-
-    Returns
-    -----
-    out : SmallDot object
-        A SmallDot object satisfying the specified parameters
-    '''
+    """
+    A smaller version of a Dot for fine details.
+    
+    Creates a small filled circle with the default small dot radius,
+    useful for marking fine points or creating detailed diagrams.
+    
+    Args:
+        point: Coordinates of the center of the small dot (default: ORIGIN).
+        radius: Radius of the dot (default: DEFAULT_SMALL_DOT_RADIUS).
+        **kwargs: Additional parameters passed to Dot.
+    
+    Example:
+        >>> small_dot = SmallDot(point=UP + RIGHT, fill_color=BLUE)
+        >>> self.add(small_dot)
+    
+    Returns:
+        SmallDot: A small filled circle representing a point.
+    """
 
     def __init__(
         self,
@@ -515,24 +528,24 @@ class SmallDot(Dot):
 
 
 class Ellipse(Circle):
-    '''
-    Creates an ellipse.
-    Parameters
-    -----
-    width : float
-        Width of the ellipse
-    height : float
-        Height of the ellipse
-    arc_center : array_like
-        Coordinates of center of the ellipse
-    Examples :
-            ellipse = Ellipse(width=4, height=1, arc_center=(3, 3, 0))
-            ellipse = Ellipse(width=2, height=5, arc_center=ORIGIN, color=BLUE)
-    Returns
-    -----
-    out : Ellipse object
-        An Ellipse object satisfying the specified parameters
-    '''
+    """
+    An elliptical geometric shape.
+    
+    Creates an ellipse by scaling a circle differently in width and height.
+    Useful for creating oval shapes and elongated circular objects.
+    
+    Args:
+        width: Width of the ellipse (default: 2.0).
+        height: Height of the ellipse (default: 1.0).
+        **kwargs: Additional parameters passed to Circle (arc_center, color, etc.).
+    
+    Example:
+        >>> ellipse = Ellipse(width=4, height=1, arc_center=(3, 3, 0))
+        >>> ellipse = Ellipse(width=2, height=5, arc_center=ORIGIN, color=BLUE)
+    
+    Returns:
+        Ellipse: An elliptical shape with the specified dimensions.
+    """
 
     def __init__(
         self,
